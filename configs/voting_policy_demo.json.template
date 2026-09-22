@@ -1,0 +1,149 @@
+{
+ "competition_points_only": true,
+ "concurrency": {
+  "global_max_in_flight_posts": 1,
+  "persist_posting_before_network": true,
+  "restart_from_posting_is_get_only": true,
+  "serialize_by_race_id": true
+ },
+ "connection_date": "__RACE_DATE__",
+ "http": {
+  "connect_timeout_seconds": 5,
+  "login_get_max_attempts": 2,
+  "login_get_request_timeout_seconds": 15,
+  "login_get_retry_minimum_cutoff_margin_seconds": 90,
+  "max_response_body_bytes": 1048576,
+  "post_max_attempts": 1,
+  "post_request_timeout_seconds": 20,
+  "response_header_timeout_seconds": 10,
+  "tls_handshake_timeout_seconds": 5,
+  "tls_verification_required": true
+ },
+ "interfaces": {
+  "allow_non_loopback": false,
+  "control_socket": "var/voting-demo/votingd.sock",
+  "control_socket_mode": "0600",
+  "directory_mode": "0700",
+  "file_mode": "0600",
+  "state_directory": "var/voting-demo",
+  "status_listen": "127.0.0.1:18777"
+ },
+ "modes": {
+  "allowed": [
+   "OFFLINE",
+   "AUTH_CHECK",
+   "READ_ONLY",
+   "FULL_DAY_ARMED",
+   "SHADOW"
+  ],
+  "default": "READ_ONLY",
+  "production_enabled": false
+ },
+ "planner": {
+  "canonical_hash": {
+   "algorithm": "sha256",
+   "compact": true,
+   "scope": "payload",
+   "sort_keys": true,
+   "utf8": true
+  },
+  "implementation": "pykeiba_bundle",
+  "one_file_per_race": false,
+  "plan_command": [
+   "-m",
+   "pykeiba",
+   "plan",
+   "--date"
+  ],
+  "python": ".venv/bin/python",
+  "require_operator_arm": true
+ },
+ "policy_id": "KIT-DEMO-POLICY-V1",
+ "redacted_fields": [
+  "authorization",
+  "access_token",
+  "token",
+  "password",
+  "KEIBA_LOGIN_ID",
+  "KEIBA_PASSWORD",
+  "KEIBA_DATA_API_KEY"
+ ],
+ "runtime": {
+  "go_mod_version": "1.26",
+  "language": "go",
+  "standard_library_first": true,
+  "toolchain": "go1.26.6",
+  "version": "1.26.6"
+ },
+ "schema_version": 1,
+ "status": "frozen_for_implementation",
+ "stop_conditions": [
+  "kill switch exists",
+  "date or policy mismatch",
+  "bundle, plan, or confirmation hash mismatch",
+  "daily race or stake budget exceeded",
+  "clock skew exceeds limit",
+  "race hard cutoff reached",
+  "existing vote differs from plan",
+  "HTTP 429 or 5xx",
+  "POST result is ambiguous",
+  "response contract is unknown",
+  "journal or snapshot integrity failure",
+  "any acceptance test is incomplete"
+ ],
+ "storage": {
+  "automatic_deletion": false,
+  "journal": "var/voting-demo/events.jsonl",
+  "journal_fsync_each_event": true,
+  "retention_days_after_competition": 30,
+  "single_writer": true,
+  "snapshot": "var/voting-demo/snapshot.json",
+  "snapshot_atomic_rename": true
+ },
+ "submission": {
+  "allow_overwrite": false,
+  "allowed_bet_id_patterns": [
+   "^b[12]_c0_([1-9]|1[0-8])$",
+   "^b3_c0_[1-8]_[1-8]$",
+   "^b[456]_c0_([1-9]|1[0-8])_([1-9]|1[0-8])$",
+   "^b[78]_c0_([1-9]|1[0-8])_([1-9]|1[0-8])_([1-9]|1[0-8])$"
+  ],
+  "automatic_post_retry": false,
+  "enabled": true,
+  "kill_switch": "var/STOP_VOTING",
+  "max_arms": 36,
+  "max_bets_per_race": 10,
+  "max_daily_total_stake": 500000,
+  "max_expanded_bet_points": 200,
+  "max_post_requests": 36,
+  "max_races": 36,
+  "max_races_per_request": 1,
+  "max_stake_per_race": 20000,
+  "max_total_stake": 500000,
+  "require_empty_precheck": true,
+  "require_exact_get_reconciliation": true,
+  "require_sorted_combinations": true,
+  "required_environment": {
+   "KEIBA_ENABLE_SUBMISSION": "__RACE_DATE__"
+  },
+  "stake_unit": 100
+ },
+ "timezone": "Asia/Tokyo",
+ "timing": {
+  "hard_cutoff_seconds_before_post": 240,
+  "maximum_clock_skew_seconds": 2,
+  "official_cutoff_seconds_before_post": 180,
+  "plan_freeze_seconds_before_post": 480,
+  "shutdown_grace_seconds": 10,
+  "target_submit_seconds_before_post": 420,
+  "verification_initial_wait_seconds": 60,
+  "verification_interval_seconds": 30,
+  "verification_max_get_attempts": 3
+ },
+ "token": {
+  "local_usable_lifetime_seconds": 240,
+  "log": false,
+  "official_lifetime_seconds": 300,
+  "persist": false
+ }
+}

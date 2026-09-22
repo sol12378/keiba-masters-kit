@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    # macOS is the supported platform, so that is what CI proves.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26'
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Build
+        run: |
+          mkdir -p bin
+          go build -o bin/votingd ./cmd/votingd
+          go build -o bin/votectl ./cmd/votectl
+
+      - name: Go tests
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Python environment
+        run: |
+          uv venv .venv
+          uv pip install --python .venv/bin/python -e '.[dev]'
+
+      - name: Lint
+        run: .venv/bin/python -m ruff check pykeiba tests
+
+      - name: Python tests
+        run: .venv/bin/python -m pytest -q
+
+      - name: Model pipeline end to end
+        # No network and no data: the synthetic generator supplies everything.
+        run: |
+          .venv/bin/python -m pykeiba synth --out data/ci --days 4 --races-per-day 6 --seed 7
+          .venv/bin/python -m pykeiba train --panel data/ci --out out/model.json
+          .venv/bin/python -m pykeiba policy-table --out out/policy_table.json --goal 1900000 --races 24
+          .venv/bin/python -m pykeiba verify --table out/policy_table.json
+          .venv/bin/python -m pykeiba backtest --panel data/ci --model out/model.json --table out/policy_table.json

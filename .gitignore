@@ -1,0 +1,30 @@
+# Build output
+/bin/
+/dist/
+
+# Runtime state: ledgers, journals, sockets, paper-driver state
+/var/
+
+# Local data the user supplies; never redistributed by this repository
+/data/
+
+# Generated artifacts
+/out/
+*.tmp
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# macOS
+.DS_Store

@@ -1,0 +1,50 @@
+{
+ "bundle_id": "contract-bundle",
+ "bundle_sha256": "a776b701cc69f41677d288e095a950f8d08fae7f69fef12dcc6d0e0a599315de",
+ "created_at": "2026-09-26T05:10:00Z",
+ "plans": [
+  {
+   "created_at": "2026-09-26T05:10:00Z",
+   "hard_submit_deadline": "2026-09-26T05:26:00Z",
+   "payload": {
+    "bet_list": [
+     {
+      "bet_id": "b8_c0_5_2_10",
+      "money": "300"
+     },
+     {
+      "bet_id": "b8_c0_10_1_3",
+      "money": "100"
+     }
+    ],
+    "mark": {
+     "1": 1,
+     "10": 4,
+     "2": 2,
+     "3": 3,
+     "4": 4,
+     "5": 4
+    },
+    "race_id": "202609260411"
+   },
+   "payload_sha256": "4a3a672d64ebba7eed3f7ee426e9fecc531f498a688e685a4814098796a9c314",
+   "plan_id": "contract-202609260411",
+   "policy_id": "CONTRACT-POLICY-V1",
+   "provenance": {
+    "adapter_version": "pykeiba/0.1.0",
+    "forecast_path": "fixtures/contract_race.json",
+    "forecast_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "model_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+   },
+   "race_date": "2026-09-26",
+   "scheduled_post_time": "2026-09-26T05:30:00Z",
+   "schema_version": 1,
+   "target_submit_time": "2026-09-26T05:25:00Z"
+  }
+ ],
+ "policy_id": "CONTRACT-POLICY-V1",
+ "race_date": "2026-09-26",
+ "schema_version": 1,
+ "source_path": "fixtures/contract_race.json",
+ "source_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  The voting daemon, kept alive by launchd.
+
+  KeepAlive is the point of running it this way.  A race has one submission
+  window a few minutes wide; a crash inside that window with nothing to restart
+  the process means the race is simply missed.  launchd restarts it, the
+  daemon reads its journal back, and any race left mid-flight is resolved by
+  querying what the other side recorded rather than by submitting again.
+
+  ProcessType Interactive asks macOS not to throttle it under App Nap.  Nothing
+  here survives a sleeping Mac: see docs/03-launchd.md.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>__LABEL__</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>__PROJECT_ROOT__/bin/votingd</string>
+    <string>--project-root</string>
+    <string>__PROJECT_ROOT__</string>
+    <string>--policy</string>
+    <string>__POLICY__</string>
+    <string>--driver</string>
+    <string>__DRIVER__</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>__PROJECT_ROOT__</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>TZ</key>
+    <string>__TIMEZONE__</string>
+    <!--
+      Credentials are NOT set here.  A plist is world-readable and ends up in
+      backups.  The live driver reads KEIBA_LOGIN_ID and KEIBA_PASSWORD from
+      the environment; load them from the Keychain in a wrapper, or run the
+      daemon from a shell that has them.  The paper driver needs neither.
+    -->
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>__PROJECT_ROOT__/var/log/__LABEL__.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>__PROJECT_ROOT__/var/log/__LABEL__.err.log</string>
+</dict>
+</plist>

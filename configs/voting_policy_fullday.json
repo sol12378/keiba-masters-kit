@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "policy_id": "VOTING-SERVER-FULL-DAY-2026-08-15-V1",
+  "status": "frozen_for_implementation",
+  "timezone": "Asia/Tokyo",
+  "connection_date": "2026-08-15",
+  "competition_points_only": true,
+  "runtime": {
+    "language": "go",
+    "version": "1.26.6",
+    "go_mod_version": "1.26",
+    "toolchain": "go1.26.6",
+    "standard_library_first": true
+  },
+  "interfaces": {
+    "status_listen": "127.0.0.1:18766",
+    "allow_non_loopback": false,
+    "control_socket": "var/voting-fullday/votingd.sock",
+    "control_socket_mode": "0600",
+    "state_directory": "var/voting-fullday",
+    "directory_mode": "0700",
+    "file_mode": "0600"
+  },
+  "modes": {
+    "default": "READ_ONLY",
+    "allowed": [
+      "OFFLINE",
+      "AUTH_CHECK",
+      "READ_ONLY",
+      "FULL_DAY_ARMED",
+      "SHADOW"
+    ],
+    "production_enabled": false
+  },
+  "planner": {
+    "implementation": "python_vote_plan_bundle_adapter",
+    "python": ".venv/bin/python3",
+    "forecast_command": [
+      "tools/run_daily_forecast.py",
+      "--date"
+    ],
+    "plan_command": [
+      "tools/build_vote_plan.py",
+      "--date",
+      "--target-turnover",
+      "500000"
+    ],
+    "plan_schema": "configs/schemas/voting_plan_bundle_v1.schema.json",
+    "one_file_per_race": false,
+    "require_operator_arm": true,
+    "canonical_hash": {
+      "algorithm": "sha256",
+      "scope": "bundle plan IDs, payload hashes, and scheduled times",
+      "utf8": true,
+      "sort_keys": true,
+      "compact": true
+    },
+    "qualification_minimum_races": 96,
+    "qualification_minimum_turnover": 500000,
+    "target_opportunities": 132,
+    "qualification_opportunities_by_day": [15, 15, 15, 15, 15, 15, 15, 15, 12],
+    "qualification_dates_by_day": ["2026-08-29", "2026-08-30", "2026-09-05", "2026-09-06", "2026-09-12", "2026-09-13", "2026-09-19", "2026-09-20", "2026-09-21"],
+    "qualification_reserve_races": 36,
+    "qualification_stop_confirmed_races": 96,
+    "qualification_stop_turnover_points": 500000,
+    "qualification_candidate_manifest_template": "configs/competition_2026_candidate_manifest_template.json",
+    "qualification_base_stake_contract": {
+      "first_count": 8,
+      "first_stake_points": 5300,
+      "remaining_count": 88,
+      "remaining_stake_points": 5200,
+      "total_points": 500000
+    }
+  },
+  "timing": {
+    "plan_freeze_seconds_before_post": 480,
+    "target_submit_seconds_before_post": 420,
+    "hard_cutoff_seconds_before_post": 240,
+    "official_cutoff_seconds_before_post": 180,
+    "maximum_clock_skew_seconds": 2,
+    "verification_initial_wait_seconds": 60,
+    "verification_interval_seconds": 30,
+    "verification_max_get_attempts": 3,
+    "shutdown_grace_seconds": 10
+  },
+  "http": {
+    "connect_timeout_seconds": 5,
+    "tls_handshake_timeout_seconds": 5,
+    "response_header_timeout_seconds": 10,
+    "login_get_request_timeout_seconds": 15,
+    "post_request_timeout_seconds": 20,
+    "max_response_body_bytes": 1048576,
+    "tls_verification_required": true,
+    "login_get_max_attempts": 2,
+    "login_get_retry_minimum_cutoff_margin_seconds": 90,
+    "post_max_attempts": 1
+  },
+  "token": {
+    "official_lifetime_seconds": 300,
+    "local_usable_lifetime_seconds": 240,
+    "persist": false,
+    "log": false
+  },
+  "submission": {
+    "enabled": true,
+    "required_environment": {
+      "KEIBA_ENABLE_FULL_DAY_SUBMISSION": "FULL-DAY-2026-08-15"
+    },
+    "max_arms": 36,
+    "max_post_requests": 36,
+    "max_races": 36,
+    "max_races_per_request": 1,
+    "max_bets_per_race": 1,
+    "max_total_stake": 500000,
+    "max_stake_per_race": 20000,
+    "max_daily_total_stake": 500000,
+    "stake_unit": 100,
+    "max_expanded_bet_points": 200,
+    "allowed_bet_id_patterns": [
+      "^b3_c0_[1-8]_[1-8]$"
+    ],
+    "require_sorted_combinations": true,
+    "require_empty_precheck": true,
+    "allow_overwrite": false,
+    "automatic_post_retry": false,
+    "require_exact_get_reconciliation": true,
+    "kill_switch": "var/STOP_VOTING"
+  },
+  "concurrency": {
+    "global_max_in_flight_posts": 1,
+    "serialize_by_race_id": true,
+    "persist_posting_before_network": true,
+    "restart_from_posting_is_get_only": true
+  },
+  "storage": {
+    "journal": "var/voting-fullday/events.jsonl",
+    "snapshot": "var/voting-fullday/snapshot.json",
+    "journal_fsync_each_event": true,
+    "snapshot_atomic_rename": true,
+    "single_writer": true,
+    "retention_days_after_competition": 30,
+    "automatic_deletion": false
+  },
+  "redacted_fields": [
+    "authorization",
+    "access_token",
+    "token",
+    "password",
+    "KEIBA_LOGIN_ID",
+    "KEIBA_PASSWORD",
+    "KEIBA_DATA_API_KEY"
+  ],
+  "stop_conditions": [
+    "kill switch exists",
+    "date or policy mismatch",
+    "bundle, plan, or confirmation hash mismatch",
+    "daily race or stake budget exceeded",
+    "clock skew exceeds limit",
+    "race hard cutoff reached",
+    "existing vote differs from plan",
+    "HTTP 429 or 5xx",
+    "POST result is ambiguous",
+    "response contract is unknown",
+    "journal or snapshot integrity failure",
+    "any acceptance test is incomplete"
+  ]
+}
