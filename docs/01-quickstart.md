@@ -50,7 +50,7 @@ make demo
 The demo:
 
 1. clears today's state directory under `var/`;
-2. moves one day's races to start six minutes from now;
+2. moves one day's races to start ten minutes from now;
 3. renders a policy for that date and builds a plan bundle;
 4. starts `votingd` on the paper driver;
 5. imports and arms the day against the bundle's SHA-256;

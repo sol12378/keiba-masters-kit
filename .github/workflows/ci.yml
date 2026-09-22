@@ -40,6 +40,13 @@ jobs:
       - name: Python tests
         run: .venv/bin/python -m pytest -q
 
+      - name: Secret scan
+        # The repository ships configuration and a live-service client, so a
+        # credential pasted into a config is the realistic mistake to catch.
+        run: |
+          brew install gitleaks
+          gitleaks detect --no-banner --redact
+
       - name: Model pipeline end to end
         # No network and no data: the synthetic generator supplies everything.
         run: |
