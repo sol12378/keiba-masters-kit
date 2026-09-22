@@ -2,6 +2,10 @@
  "hits": 4,
  "implied_final_bank": 5498060,
  "official_final_bank": 5504260,
+ "race_date_range": [
+  "2026-08-29",
+  "2026-09-20"
+ ],
  "races_confirmed": 204,
  "races_not_confirmed": [
   {
@@ -77,6 +81,5 @@
  },
  "total_payout": 5725360,
  "total_stake": 1227300,
- "unexplained_credit": 6200,
- "window": "2026-08-29..2026-09-21"
+ "unexplained_credit": 6200
 }

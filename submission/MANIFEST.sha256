@@ -1,7 +1,7 @@
-cae1a8a59ba0d01df972aefa872cc0e36d2252d475b3dd9a31995d6ab9d086a1  ./README.md
+4b0662a40b29a66662dae127414d5c674b951a903513bdd87890181efdd5f0ec  ./README.md
 5a6e4031bd18e3e514af1723a0440a92e1e39cf0362407cc4269423f0fc030ab  ./ledger/daily.json
 31a6b19d1fcc8d96efd5b2896768fdb7ae83bca4b1a42dc205f78ea1065bb56c  ./ledger/races.json
-40a4ca15d7cfb5eeea2124722b21cc53491f0f0e74fb8ce8b5b688dd75d46b2f  ./ledger/summary.json
+0e102216bbc328eb048f947d82e9fa4ccccfcc78c4f25e189105e9269845667a  ./ledger/summary.json
 2e2e0dc1a7b3b607fe26b7d220940c21d98c33c29f658e14e662dc84e7b692f3  ./phase1/allin_plan.py
 22c7a4477fab6fedac8d6e7b1232c09b1db9604d169badedb3c98950b0de5bf0  ./phase1/build_vote_plan.py
 952790330808b49d9fd6a188b2ef3be32c2c71065651385ff0c4aa57f5ee281e  ./phase1/fixtures/surface_sample.json
@@ -13,6 +13,6 @@ f85bcd9c45423ae056dd22ca50e699c0fffee1c444aa55c71cbf844b1429252a  ./phase2/nll_s
 32c26a2f6bbe564d0386eb41c1ba91f2e7240aa21b21690056839ce37273d1e9  ./phase2/nll_surface.npz
 021f22aeaf5143016f17e769cb0010d8c0888999d442e19f659d984731b65a6a  ./phase2/optimizer.py
 7c8dd3dd8e98236c14ec9384cebda72ebbbc6c675bbb08779bb3efdfffeb420d  ./phase2/reproduce.py
-148643a0fd15d0db15bf03e8e5a4927b5d1e35af8f995e4fa845f24c44b2de88  ./tools/build_ledger.py
+3e0e3fecd3f2e6eea8d8c3af0f072973f524859eb65c95305d89cbe98729230d  ./tools/build_ledger.py
 5b981d43f2596e80861cd6ec1e70452c8e03b702c9d3689e0731842793e0d96c  ./tools/build_nll_surface.py
 8cc4fef1c5268005178513982eba8d937c6750e95b1cb2cbfef57965538cb807  ./tools/synthetic_surface.py

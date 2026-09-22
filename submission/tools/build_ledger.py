@@ -177,7 +177,10 @@ def main() -> None:
     total_stake = sum(e["stake"] for e in confirmed)
     total_payout = sum(e["payout"] or 0 for e in confirmed)
     summary = {
-        "window": "2026-08-29..2026-09-21",
+        # Derived from the races themselves rather than labelled by hand, so
+        # it states the range that was actually bet and cannot drift from the
+        # contest's own dates.
+        "race_date_range": [confirmed[0]["race_date"], confirmed[-1]["race_date"]] if confirmed else None,
         "races_confirmed": len(confirmed),
         "races_not_confirmed": [
             {"race_id": e["race_id"], "state": e["state"]} for e in ordered if e["state"] != "CONFIRMED"

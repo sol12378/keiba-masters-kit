@@ -77,7 +77,7 @@ The live driver (`--driver live`) submits to the official contest endpoint with
 your own contest account, read from `KEIBA_LOGIN_ID` and `KEIBA_PASSWORD`.
 
 **It only works while the contest is accepting votes.** The 2026 contest closed
-on 21 September 2026; outside a contest window the endpoint rejects every
+on 22 September 2026; outside a contest window the endpoint rejects every
 submission, so `--driver live` has nothing to talk to. The paper driver is what
 makes the rest of the repository useful after that date, and it is the default
 for exactly that reason.
