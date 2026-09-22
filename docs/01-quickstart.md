@@ -69,8 +69,9 @@ CONFIRMED`. The submission happens 300 seconds before post time and the
 confirmation read-back follows about a minute later.
 
 `paper_state.json` is the paper driver's ledger: the votes it accepted and the
-simulated balance. After three races of two 10,000-point tickets each it reads
-`940000`.
+simulated balance, starting from 1,000,000. It falls by exactly what the plan
+staked, so it is the quickest way to check that what was submitted is what the
+planner decided.
 
 Stop the demo with Ctrl-C.
 
