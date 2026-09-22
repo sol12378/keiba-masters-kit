@@ -123,3 +123,27 @@ func TestPaperDriverRejectsStakeAboveBalance(t *testing.T) {
 		t.Fatalf("balance changed on a rejected submit: %d", driver.Balance())
 	}
 }
+
+// The runtime confirms a submission by comparing the canonical JSON of the
+// whole payload, and a JSON array is ordered.  A driver that tidies the bet
+// list turns every race into a CONFLICT and halts the day, which is what
+// happened the first time this ran under launchd.
+func TestPaperDriverReadsBackTheBetListInTheSubmittedOrder(t *testing.T) {
+	driver := newTestPaperDriver(t)
+	token, _ := driver.Login(context.Background(), "local", "local")
+	payload := paperPayload()
+	payload.BetList = []Bet{
+		{BetID: "b8_c0_2_8_5", Money: "10000"},
+		{BetID: "b8_c0_2_8_3", Money: "10000"},
+	}
+	if _, err := driver.Submit(context.Background(), token, payload); err != nil {
+		t.Fatalf("Submit: %v", err)
+	}
+	votes, err := driver.Check(context.Background(), token, payload.RaceID)
+	if err != nil {
+		t.Fatalf("Check: %v", err)
+	}
+	if !CheckedVoteMatches(payload, votes) {
+		t.Fatalf("read-back does not reconcile with the payload:\n  sent %+v\n  got  %+v", payload.BetList, votes[0].Bet)
+	}
+}

@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -146,7 +145,11 @@ func (driver *PaperDriver) Submit(_ context.Context, token string, payload RaceP
 	for horse, value := range payload.Mark {
 		mark[horse] = value
 	}
-	sort.Slice(bets, func(i, j int) bool { return bets[i].BetID < bets[j].BetID })
+	// Record the bets exactly as submitted, in the submitted order.
+	// Reconciliation compares the canonical JSON of the whole payload, and a
+	// JSON array is ordered, so re-sorting here would make every read-back
+	// disagree with the plan and halt the day on a CONFLICT the operator did
+	// not cause.
 	driver.votes[payload.RaceID] = CheckedVote{RaceID: payload.RaceID, Mark: mark, Bet: bets}
 	driver.balance -= stake
 	if err := driver.persistLocked(); err != nil {
