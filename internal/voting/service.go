@@ -228,6 +228,21 @@ func (service *Service) ArmBundle(bundle PlanBundle, confirmation string) ([]Rac
 		if !ok || record.Plan.PayloadSHA256 != plan.PayloadSHA256 {
 			return nil, fmt.Errorf("bundle plan %s has not been imported exactly", plan.PlanID)
 		}
+		// The payload hash covers race_id, marks and bets -- not the schedule.
+		// Re-planning the same selections for a different post time therefore
+		// leaves the payload hash unchanged while the bundle hash moves, so an
+		// operator can confirm a new bundle and arm the previously imported
+		// schedule. Compare the times too, and make them say so.
+		if !record.Plan.TargetSubmitTime.Equal(plan.TargetSubmitTime) ||
+			!record.Plan.ScheduledPostTime.Equal(plan.ScheduledPostTime) ||
+			!record.Plan.HardSubmitDeadline.Equal(plan.HardSubmitDeadline) {
+			return nil, fmt.Errorf(
+				"bundle plan %s carries a different schedule than the imported plan "+
+					"(imported post %s, bundle post %s); re-import before arming",
+				plan.PlanID,
+				record.Plan.ScheduledPostTime.UTC().Format(time.RFC3339),
+				plan.ScheduledPostTime.UTC().Format(time.RFC3339))
+		}
 		if record.State != StateValidated {
 			return nil, fmt.Errorf("bundle plan %s state %s cannot be armed", plan.PlanID, record.State)
 		}

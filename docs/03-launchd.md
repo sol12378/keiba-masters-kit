@@ -29,9 +29,26 @@ path, the driver and the timezone. It runs `plutil -lint` before loading, then
 `--driver live` prompts for typed confirmation before installing. That is
 deliberate friction.
 
+## The agent cannot submit unless you say so
+
+A launchd agent inherits almost nothing from your shell, so the date-scoped
+variable the policy requires (`KEIBA_ENABLE_SUBMISSION`) is simply absent. An
+agent installed and forgotten will start, serve status, and **refuse to arm a
+day**. That is the intended default.
+
+```bash
+./scripts/launchd.sh install --policy var/policy_20260926.json --enable-submission
+```
+
+`--enable-submission` copies the policy's `required_environment` into the
+plist and prints what it set. The value is a date, not a credential — it is
+the operator saying "today", and the policy it is copied from is valid for
+exactly that day. Re-installing for another day requires another policy and
+another explicit flag.
+
 Override the label prefix with `LABEL_PREFIX=...` if you run more than one.
 
-## Credentials are not in the plist
+## Credentials are still not in the plist
 
 A plist is world-readable and gets swept into backups. The template sets `TZ`
 and nothing else.

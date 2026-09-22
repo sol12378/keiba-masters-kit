@@ -44,6 +44,7 @@
   <dict>
     <key>TZ</key>
     <string>__TIMEZONE__</string>
+__EXTRA_ENV__
     <!--
       Credentials are NOT set here.  A plist is world-readable and ends up in
       backups.  The live driver reads KEIBA_LOGIN_ID and KEIBA_PASSWORD from

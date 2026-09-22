@@ -43,6 +43,19 @@ the state that makes restarts safe.
 **CONFLICT** means the read-back found something different from what was sent.
 That is a hard stop.
 
+## Importing and arming are two steps, and both are checked
+
+`import-day` validates a bundle and stores each plan as `VALIDATED`.
+`arm-day` requires the bundle's SHA-256 typed back, and requires every plan in
+it to match what was imported — both the payload hash **and** the schedule.
+
+The schedule check is there because the payload hash does not cover it. A
+payload is `race_id`, marks and bets; re-planning the same selections for a
+different post time leaves that hash identical while the bundle hash moves.
+Without the schedule comparison an operator could confirm today's bundle and
+arm yesterday's timings, which is how four races were once armed straight into
+`EXPIRED`. Re-import after re-planning.
+
 ## Crash recovery
 
 The journal is append-only and fsynced per event, and `POSTING` is written

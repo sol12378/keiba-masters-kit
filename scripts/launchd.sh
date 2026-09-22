@@ -22,17 +22,19 @@ TIMEZONE="${TZ:-Asia/Tokyo}"
 DOMAIN="gui/$(id -u)"
 
 usage() {
-  echo "usage: scripts/launchd.sh <install|status|logs|uninstall> [--policy FILE] [--driver paper|live]" >&2
+  echo "usage: scripts/launchd.sh <install|status|logs|uninstall> [--policy FILE] [--driver paper|live] [--enable-submission]" >&2
   exit 2
 }
 
 command="${1:-}"; shift || usage
 policy=""
 driver="paper"
+enable_submission=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --policy) policy="${2:-}"; shift 2 ;;
     --driver) driver="${2:-}"; shift 2 ;;
+    --enable-submission) enable_submission=1; shift ;;
     *) usage ;;
   esac
 done
@@ -56,12 +58,41 @@ case "$command" in
     esac
     [ -x bin/votingd ] || go build -o bin/votingd ./cmd/votingd
     mkdir -p "$AGENT_DIR" var/log
-    sed -e "s#__LABEL__#${LABEL}#g" \
-        -e "s#__PROJECT_ROOT__#${PROJECT_ROOT}#g" \
-        -e "s#__POLICY__#${policy}#g" \
-        -e "s#__DRIVER__#${driver}#g" \
-        -e "s#__TIMEZONE__#${TIMEZONE}#g" \
-        "$TEMPLATE" > "$PLIST"
+
+    # A launchd agent inherits almost nothing, so the date-scoped variable the
+    # policy requires is absent and the day cannot be armed.  That is the safe
+    # default: an agent installed and forgotten can never submit.  Passing
+    # --enable-submission copies the policy's required_environment into the
+    # plist.  It is not a credential -- it is the operator saying "today".
+    if [ "$enable_submission" = "0" ]; then
+      echo "note: installed without --enable-submission, so the agent will run"
+      echo "      but refuse to arm a day. Re-install with --enable-submission"
+      echo "      when you actually intend to submit."
+    fi
+    LABEL="$LABEL" PROJECT_ROOT="$PROJECT_ROOT" POLICY="$policy" DRIVER="$driver" \
+    TIMEZONE="$TIMEZONE" ENABLE_SUBMISSION="$enable_submission" TEMPLATE="$TEMPLATE" \
+    /usr/bin/python3 - "$PLIST" <<'PYEOF'
+import json, os, sys
+from xml.sax.saxutils import escape
+
+template = open(os.environ["TEMPLATE"], encoding="utf-8").read()
+for key in ("LABEL", "PROJECT_ROOT", "POLICY", "DRIVER", "TIMEZONE"):
+    template = template.replace(f"__{key}__", escape(os.environ[key]))
+
+extra = ""
+if os.environ["ENABLE_SUBMISSION"] == "1":
+    required = json.load(open(os.environ["POLICY"], encoding="utf-8"))["submission"]
+    pairs = sorted((required.get("required_environment") or {}).items())
+    extra = "\n".join(
+        f"    <key>{escape(k)}</key>\n    <string>{escape(str(v))}</string>" for k, v in pairs
+    )
+    for k, v in pairs:
+        print(f"submission environment set in the plist: {k}={v}")
+
+lines = [line for line in template.splitlines() if line != "__EXTRA_ENV__" or extra]
+rendered = "\n".join(line if line != "__EXTRA_ENV__" else extra for line in lines)
+open(sys.argv[1], "w", encoding="utf-8").write(rendered + "\n")
+PYEOF
     plutil -lint "$PLIST" >/dev/null
     launchctl bootout "$DOMAIN/$LABEL" 2>/dev/null || true
     launchctl bootstrap "$DOMAIN" "$PLIST"

@@ -24,6 +24,12 @@ Yesterday's bundle cannot be replayed today.
 should be a decision someone makes that day, not a flag left set from last
 week.
 
+Under launchd, gate 4 has to be opted into explicitly:
+`scripts/launchd.sh install --enable-submission` copies the policy's
+`required_environment` into the plist and says what it set. Without the flag
+the agent runs but cannot arm anything, which is what an agent someone
+installed months ago should do.
+
 **5. An operator arms the exact bundle.** `arm-day --confirm-sha256 <digest>`,
 where the digest must match the bundle's own hash, recomputed by the daemon
 from the content. A plan that changed by one point fails here.
