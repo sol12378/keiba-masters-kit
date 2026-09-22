@@ -19,7 +19,9 @@ say "0/8  Reset this demo's runtime state"
 # Only this demo's own directory, and only ever under var/.  The runtime is
 # append-only by design: it refuses to re-import a plan id whose content
 # differs, which is exactly what a second demo run would try to do.
-STATE_DIR="var/voting-demo"
+# The rendered policy gives each race day its own directory, so a second run
+# on the same day is the case that needs clearing.
+STATE_DIR="var/voting-$(date +%Y%m%d)"
 case "$STATE_DIR" in var/*) rm -rf -- "$STATE_DIR" ;; *) echo "refusing to clear $STATE_DIR" >&2; exit 1 ;; esac
 echo "cleared $STATE_DIR"
 
@@ -73,8 +75,8 @@ done
 say "8/8  Watch the daemon submit and reconcile"
 echo "The first race submits about $((FIRST_POST_IN - 5)) minutes from now."
 echo "Follow it with:   ./bin/votectl --policy var/policy_${RACE_DATE}.json status"
-echo "Paper ledger:     var/voting-demo/paper_state.json"
-echo "Event journal:    var/voting-demo/events.jsonl"
+echo "Paper ledger:     var/voting-${RACE_DATE}/paper_state.json"
+echo "Event journal:    var/voting-${RACE_DATE}/events.jsonl"
 echo "Daemon log:       var/votingd.${RACE_DATE}.log"
 echo
 echo "Press Ctrl-C to stop the daemon."

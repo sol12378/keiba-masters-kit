@@ -147,7 +147,12 @@ def command_render_policy(args: argparse.Namespace) -> int:
     """
     template = Path(args.template).read_text(encoding="utf-8")
     iso_date = f"{args.date[:4]}-{args.date[4:6]}-{args.date[6:]}"
-    rendered = template.replace("__RACE_DATE__", iso_date)
+    # One state directory per race day.  A day's journal, snapshot and socket
+    # must not be shared with another day's: the runtime refuses to re-import a
+    # plan id whose content differs, so yesterday's leftovers turn today's
+    # import into a conflict, and an operator who forces past it can arm
+    # yesterday's schedule.
+    rendered = template.replace("__RACE_DATE_COMPACT__", args.date).replace("__RACE_DATE__", iso_date)
     document = json.loads(rendered)
     document["policy_id"] = f"{document['policy_id']}-{args.date}"
     out = Path(args.out or f"var/policy_{args.date}.json")
@@ -158,6 +163,7 @@ def command_render_policy(args: argparse.Namespace) -> int:
         "policy_id": document["policy_id"],
         "connection_date": document["connection_date"],
         "required_environment": document["submission"]["required_environment"],
+        "state_directory": document["interfaces"]["state_directory"],
     })
     return 0
 

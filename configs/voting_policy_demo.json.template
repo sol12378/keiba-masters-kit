@@ -21,11 +21,11 @@
  },
  "interfaces": {
   "allow_non_loopback": false,
-  "control_socket": "var/voting-demo/votingd.sock",
+  "control_socket": "var/voting-__RACE_DATE_COMPACT__/votingd.sock",
   "control_socket_mode": "0600",
   "directory_mode": "0700",
   "file_mode": "0600",
-  "state_directory": "var/voting-demo",
+  "state_directory": "var/voting-__RACE_DATE_COMPACT__",
   "status_listen": "127.0.0.1:18777"
  },
  "modes": {
@@ -93,11 +93,11 @@
  ],
  "storage": {
   "automatic_deletion": false,
-  "journal": "var/voting-demo/events.jsonl",
+  "journal": "var/voting-__RACE_DATE_COMPACT__/events.jsonl",
   "journal_fsync_each_event": true,
   "retention_days_after_competition": 30,
   "single_writer": true,
-  "snapshot": "var/voting-demo/snapshot.json",
+  "snapshot": "var/voting-__RACE_DATE_COMPACT__/snapshot.json",
   "snapshot_atomic_rename": true
  },
  "submission": {

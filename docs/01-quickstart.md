@@ -49,7 +49,7 @@ make demo
 
 The demo:
 
-1. clears its own state under `var/voting-demo`;
+1. clears today's state directory under `var/`;
 2. moves one day's races to start six minutes from now;
 3. renders a policy for that date and builds a plan bundle;
 4. starts `votingd` on the paper driver;
@@ -60,8 +60,8 @@ In another shell:
 
 ```bash
 ./bin/votectl --policy var/policy_<date>.json status
-cat var/voting-demo/paper_state.json
-tail -f var/voting-demo/events.jsonl
+cat var/voting-<date>/paper_state.json
+tail -f var/voting-<date>/events.jsonl
 ```
 
 A race moves `DISCOVERED → VALIDATED → ARMED → POSTING → PENDING_CONFIRMATION →
