@@ -64,6 +64,18 @@ or `caffeinate -s` while on mains power. Check `pmset -g assertions` to confirm
 something is actually holding the machine up. Closing the lid on a laptop
 sleeps it regardless.
 
+## If the daemon crashloops immediately
+
+Check `.err.log` and `.out.log` first. One cause is worth naming because the
+underlying error is misleading: a Unix socket path is limited to 104 bytes on
+macOS, and a project cloned into a deep directory pushes the control socket
+past it. `bind()` answers `EINVAL`, which reads as "invalid argument" and
+looks like a permissions problem.
+
+The daemon now refuses with an explicit message naming the length and the
+limit. The fix is to move the checkout somewhere shorter, or to point
+`interfaces.control_socket` at a short absolute path in the policy.
+
 ## Logs
 
 `var/log/<label>.out.log` and `.err.log`. The daemon writes structured JSON

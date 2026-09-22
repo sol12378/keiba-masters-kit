@@ -330,10 +330,25 @@ func NewStatusServer(config RuntimeConfig, handler http.Handler) *http.Server {
 	}
 }
 
+// maxUnixSocketPath is the size of sockaddr_un.sun_path on macOS, including
+// the NUL terminator.
+const maxUnixSocketPath = 104
+
 func ListenControlSocket(path string) (net.Listener, error) {
 	absolute, err := filepath.Abs(path)
 	if err != nil {
 		return nil, err
+	}
+	// A Unix socket path is bounded by sockaddr_un.sun_path: 104 bytes on
+	// macOS, including the terminator.  Over that, bind() returns EINVAL,
+	// which surfaces as a bare "invalid argument" and sends people looking at
+	// permissions.  Say what is actually wrong instead.
+	if len(absolute) >= maxUnixSocketPath {
+		return nil, fmt.Errorf(
+			"control socket path is %d bytes and the platform limit is %d: %s\n"+
+				"Move the project to a shorter path, or point interfaces.control_socket "+
+				"at a shorter absolute location in the policy",
+			len(absolute), maxUnixSocketPath-1, absolute)
 	}
 	if err := rejectSymlinkComponents(absolute); err != nil {
 		return nil, err
