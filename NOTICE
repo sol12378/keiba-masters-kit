@@ -14,3 +14,13 @@ pykeiba.synth, not collected from any provider.
 The live submission driver targets a third-party contest endpoint. That
 service, its terms and its trademarks belong to their respective owners; this
 project is not affiliated with or endorsed by them.
+
+---
+
+本製品は第三者のレースデータを一切含みません。パネル形式は
+docs/04-data-contract.md に記載しており、data/ 以下のサンプルデータは
+pykeiba.synth が生成したもので、いかなる提供元からも収集していません。
+
+実投票ドライバは第三者の大会エンドポイントを対象としています。当該サービス、
+その利用規約および商標は各権利者に帰属します。本プロジェクトは当該事業者と
+提携しておらず、その承認も受けていません。

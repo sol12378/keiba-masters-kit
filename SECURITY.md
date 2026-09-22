@@ -1,30 +1,28 @@
-# Security
+# セキュリティ
 
-## Reporting
+## 報告方法
 
-Report a vulnerability through GitHub's private advisory form on this
-repository ("Security" → "Report a vulnerability"). Please do not open a public
-issue for anything that affects credentials or submission integrity.
+本リポジトリのGitHub非公開アドバイザリ（"Security" → "Report a vulnerability"）から
+報告してください。認証情報や送信の完全性に関わるものは、公開Issueを立てないで
+ください。
 
-## What is in scope
+## 対象に含まれるもの
 
-* Anything that could cause a submission the operator did not arm, or a
-  different submission from the one they armed.
-* Anything that could leak `KEIBA_LOGIN_ID` or `KEIBA_PASSWORD` into a log,
-  a state file, a journal entry or a plist.
-* Anything that lets a plan bundle pass verification while differing from the
-  hash the operator confirmed.
+* 運用者が武装していない送信を引き起こしうるもの、または武装した内容と**異なる**
+  送信を引き起こしうるもの。
+* `KEIBA_LOGIN_ID` や `KEIBA_PASSWORD` が、ログ・状態ファイル・ジャーナル・plistへ
+  漏れうるもの。
+* 運用者が確認したハッシュと異なる計画バンドルが、検証を通ってしまうもの。
 
-## What is not
+## 対象に含まれないもの
 
-* The live endpoint itself. It belongs to a third party; report problems there
-  to them, not here.
-* Losing virtual points. The strategy is expected to lose them — see
-  `DISCLAIMER.md`.
+* 実エンドポイントそのもの。第三者に属するものなので、問題はここではなく先方へ
+  報告してください。
+* 仮想ポイントを失うこと。この戦略は失うことが期待値です。
+  [DISCLAIMER.md](DISCLAIMER.md) を参照してください。
 
-## Design notes for reviewers
+## レビューする方への設計メモ
 
-Submission requires five independent conditions, listed in
-`docs/06-safety.md`. The paper driver is the default and reaches no network.
-Credentials are read from the environment only and follow the selected driver:
-the paper driver never reads them.
+送信には独立した5つの条件が必要で、[docs/06-safety.md](docs/06-safety.md) に列挙して
+あります。既定は紙投票ドライバで、ネットワークへ到達しません。認証情報は環境変数
+からのみ読み、選択されたドライバに追従します。紙投票ドライバはそれらを読みません。

@@ -1,13 +1,12 @@
-# The data contract
+# データ契約
 
-**This repository ships no race data.** Historical odds and results carry
-third-party terms this project cannot pass on, and the captures behind the
-original work run to tens of gigabytes. What is shipped is the format, plus a
-generator that produces it with known ground truth.
+**本リポジトリはレースデータを一切同梱していません。** 過去のオッズと結果には本
+プロジェクトが引き渡せない第三者の条件が付いており、元の研究で使った収集データは
+数十GBに達します。同梱しているのは形式と、真の確率が既知のデータを作る生成器です。
 
-## The panel
+## パネル
 
-A panel is a directory of one JSON file per race:
+パネルは、レースごとのJSONファイルが1つずつ並んだディレクトリです。
 
 ```
 panel/
@@ -31,80 +30,77 @@ panel/
 }
 ```
 
-| Field | Meaning |
+| フィールド | 意味 |
 |---|---|
-| `race_id` | Exactly 12 ASCII letters/digits. The runtime enforces this. |
-| `date` | `YYYYMMDD`, the local race date. Must match the directory name. |
-| `post_at` | Scheduled post time, with an offset. |
-| `captured_at` | When these prices were read. **Strictly before `post_at`.** |
-| `win` | Horse number to win odds, at `captured_at`. |
-| `trifecta` | Ordered triple to odds, at `captured_at`. |
-| `result` | Settlement. Absent until the race is settled. |
+| `race_id` | 英数字ちょうど12文字。ランタイムが強制します |
+| `date` | `YYYYMMDD`、現地のレース日。ディレクトリ名と一致すること |
+| `post_at` | 予定発走時刻。オフセット付き |
+| `captured_at` | この価格を読んだ時刻。**`post_at` より厳密に前** |
+| `win` | 馬番 → 単勝オッズ。`captured_at` 時点 |
+| `trifecta` | 順序付き3つ組 → オッズ。`captured_at` 時点 |
+| `result` | 精算。確定するまで存在しません |
 
-`payout_per_100` is the official return per 100 points staked — a multiple,
-not a yen amount. Do not infer the unit from the column name; check one
-official figure against the stored value before trusting a new source.
+`payout_per_100` は100ポイントあたりの公式払戻——**倍率であって円額ではありません**。
+列名から単位を推測しないでください。新しいデータ源を使う前に、公式の数字ひとつを
+保存値と突き合わせて確認してください。
 
-## Rules that are not conventions
+## 慣習ではなく規則であるもの
 
-**`captured_at` must be strictly before `post_at`, and the loader enforces it.**
-A panel where prices were read after the gates opened describes decisions
-nobody could have made. This is the single easiest way to fabricate a result,
-and it is easy to do by accident when a collector retries.
+**`captured_at` は `post_at` より厳密に前でなければならず、ローダーがこれを強制します。**
+発走後に読んだ価格が入ったパネルは、誰にも下せなかった判断を記述しています。これは
+結果を捏造する最も簡単な方法であり、収集がリトライしたときに事故として起きやすい
+ものでもあります。
 
-**Never use file mtime as availability.** A copied or re-synced file has a
-mtime from today and a price from last year.
+**ファイルのmtimeを可用性として使わないでください。** コピーや再同期されたファイルは、
+去年の価格を持ちながら今日のmtimeを持ちます。
 
-**Settlement is not a feature.** `result` exists so a backtest can settle
-tickets. No function that produces a probability or a decision may read it.
-`load_race` keeps it in a separate field so a violation is visible at the call
-site, and `build_features` never touches it except to locate the winning
-combination's index for the likelihood.
+**精算は特徴量ではありません。** `result` はバックテストが券を精算できるように
+存在します。確率や判断を作る関数がこれを読んではいけません。`load_race` は違反が
+呼び出し側で目に見えるよう別フィールドに保持し、`build_features` は尤度のために
+的中組合せのindexを特定する以外には触れません。
 
-**Final odds are not a feature either.** They are known only after betting
-closed. If your source has them, do not put them in `win` or `trifecta`.
+**最終オッズも特徴量ではありません。** 締切後にしか分からないものです。データ源に
+含まれていても、`win` や `trifecta` に入れないでください。
 
-**Missing is not zero.** A settled race with no payout entry for a combination
-means that ticket lost, and `payout_per_100` returns `0.0`. An unsettled or
-unknown race returns `None`, and the backtest counts it separately rather than
-folding it into the bank. Converting unknown to "lost" understates the result;
-converting it to "won" overstates it. Report the count instead.
+**欠測はゼロではありません。** 確定したレースでその組合せの払戻エントリがなければ、
+その券は外れたという意味で `payout_per_100` は `0.0` を返します。未精算・不明な
+レースは `None` を返し、バックテストは残高に畳み込まずに別途カウントします。不明を
+「外れ」に変換すれば結果を過小評価し、「当たり」に変換すれば過大評価します。代わりに
+件数を報告してください。
 
-## Incomplete races
+## 不完全なレース
 
-`build_features` raises rather than imputing when a market is partly captured.
-A race with a missing pool is dropped, and `train` reports how many were
-dropped. That number is part of the result: a pipeline that silently drops a
-third of its races is selecting on capture success, which correlates with
-whatever made capture fail.
+市場が部分的にしか取得できていない場合、`build_features` は補完せず例外を投げます。
+プールが欠けたレースは落とされ、`train` は落とした件数を報告します。**この数字は結果の
+一部です。** 3分の1を黙って落とすパイプラインは取得成功で選別しており、それは取得を
+失敗させた要因と相関します。
 
-## Bringing your own data
+## 自分のデータを持ち込む
 
-Write a collector that emits the shape above. Whatever your source, it is
-yours to comply with:
+上記の形を出力する収集スクリプトを書いてください。どのデータ源であれ、その遵守は
+あなたの責任です。
 
-* Read the terms of service of any site or feed you pull from.
-* Honour `robots.txt` and rate limits. One request per second is not slow when
-  you are reading a public site you do not pay for.
-* Identify your client honestly in the User-Agent.
-* Redistribution of collected odds is usually not permitted. Keep your panel
-  out of git — `/data` is in `.gitignore` for that reason.
+* 取得するサイトやフィードの利用規約を読んでください。
+* `robots.txt` とレート制限を守ってください。**対価を払っていない公開サイトを読む
+  のに、1秒1リクエストは遅くありません。**
+* User-Agentで自分のクライアントを正直に名乗ってください。
+* 収集したオッズの再配布は通常許可されていません。パネルはgitに入れないでください。
+  `/data` が `.gitignore` にあるのはそのためです。
 
-## The synthetic generator
+## 合成データ生成器
 
 ```bash
 .venv/bin/python -m pykeiba synth --out data/synthetic --days 6 --races-per-day 12 --seed 7
 ```
 
-It is built to be *unflattering*:
+これは意図的に**こちらに都合の悪い**作りになっています。
 
-* The market's probabilities are the true ones perturbed by noise, then marked
-  up by a takeout. There is no edge planted for a model to find.
-* Winning tickets settle **below** their quoted price (median drift 0.85).
-  Money keeps arriving after you bet, so the pool you are paid from is bigger
-  than the one you priced against. A simulation without this makes every
-  strategy look better than it is, and it is what the allocator's
-  `odds_factor` exists to absorb.
-* The finishing order is a Plackett-Luce draw from the true strengths, so
-  Harville is approximately right by construction — which is the friendliest
-  possible case for it, and worth remembering when reading a holdout number.
+* 市場の確率は真の確率にノイズを乗せたもので、そこに控除率を上乗せして価格にします。
+  モデルが見つけられるエッジは埋め込まれていません。
+* 的中券は建値**より下**で精算されます（ドリフトの中央値0.85）。賭けた後も金が入り
+  続けるので、払い戻される側のプールは価格付けした時点より大きくなっています。これを
+  入れないシミュレーションはどんな戦略も実際より良く見せますし、配分側の `odds_factor`
+  はまさにこれを吸収するために存在します。
+* 着順は真の強さからのPlackett-Luce抽出なので、Harvilleは構成上おおむね正しくなります。
+  これはHarvilleにとって**最も有利な状況**であり、holdoutの数字を読むときに覚えて
+  おく価値があります。

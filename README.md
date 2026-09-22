@@ -1,56 +1,54 @@
 # keiba-masters-kit
 
-A local betting runtime and the model pipeline that feeds it, extracted from an
-entry to the AI 競馬予想マスターズ 2026 contest.
+AI競馬予想マスターズ2026への参加実装から切り出した、ローカル投票ランタイムと
+そこへ流し込むモデル構築パイプラインです。
 
-Everything here operates on the contest's **virtual points**. Nothing in this
-repository buys a real betting ticket.
+扱うのはすべて大会の**仮想ポイント**です。実際の馬券は一切購入しません。
 
-日本語版: [README.ja.md](README.ja.md)
+English: [README.en.md](README.en.md)
 
-## What this is
+## これは何か
 
-Two halves that meet at a signed JSON file.
+署名済みJSONファイルで接続される、2つの半分でできています。
 
-**The runtime** (Go) takes a frozen plan for a day's races and submits it: one
-submission per race, at a fixed number of seconds before post time, then a
-read-back to confirm what the other side actually recorded. It keeps an
-append-only journal, survives being killed mid-submission, and runs under
-launchd so a crash inside a submission window does not cost the race.
+**ランタイム**（Go）は、1日分の凍結された計画を受け取って送信します。1レース1回、
+発走の決まった秒数前に送信し、その後**相手側が実際に記録した内容を読み返して照合**
+します。追記専用のジャーナルを持ち、送信中に強制終了されても復帰でき、launchdの下で
+動くので送信ウィンドウ内のクラッシュがレースを落とすことはありません。
 
-**The model pipeline** (Python) turns quoted odds into that plan: market
-probabilities with the overround removed, Harville ordered probabilities from
-the win pool, a two-coefficient log-linear blend of the two, and a dynamic
-program over `(races remaining, bank)` that decides what price to buy and how
-much to stake.
+**モデルパイプライン**（Python）は、公表オッズからその計画を作ります。オーバーラウンド
+を除去した市場確率、単勝プールから導くHarville順序確率、その2列のlog-linear混合、
+そして `(残りレース数, 所持ポイント)` 上の動的計画による「どの価格帯をいくら買うか」
+の決定です。
 
-The two halves hash the plan independently and a test pins them together, so a
-serialization change fails in CI rather than on a race day.
+両者は計画のハッシュを独立に計算し、それを固定するテストがあるので、直列化の変更は
+レース当日ではなくCIで落ちます。
 
-## What this is not
+## これは何ではないか
 
-It is **not a way to beat the market**. The model has two market-derived
-features and the shipped blend gives it 5% of the weight. On the synthetic data
-in this repository it improves holdout NLL by about 0.015 nats out of 5.8 —
-which is to say, barely. The dynamic program assumes *no edge at all*: every
-price band pays back less than it takes, and the program only chooses when to
-accept variance in exchange for a chance at a target. Its own reported value is
-checked against `P(reach) ≤ R_max × initial / goal`, and the solver refuses to
-return a table that claims more.
+**市場に勝つ方法ではありません。**
 
-Run `make model` and look at `mean_final_bank` in the verification output. It is
-below the starting bank, every time. That is the honest shape of this problem.
+モデルの特徴量は市場由来の2列だけで、既定の混合比は5%です。本リポジトリの合成データ
+では、holdoutのNLL改善は5.8のうち約0.015natsでした。つまりほとんど差がありません。
 
-## Requirements
+動的計画は**エッジがないことを前提**にしています。どの価格帯も取った分より少なく払い
+戻すので、動的計画がやっているのは「いつ分散を受け入れるか」の選択だけです。求めた値は
+`P(到達) ≤ R_max × 初期資金 / 目標` と照合され、これを超える表はソルバが例外にして
+返しません。
 
-macOS (Apple silicon or Intel), Go 1.26+, Python 3.11+, and
-[uv](https://github.com/astral-sh/uv).
+`make model` を実行して検証出力の `mean_final_bank` を見てください。毎回、初期資金を
+下回ります。`median_final_bank` はさらに低く、既定設定ではほぼゼロ付近です。それが
+この問題の正直な形です。
 
-macOS is the only supported platform. The Go and Python parts are portable, but
-the scheduling layer is launchd and there are no systemd or Windows equivalents
-here.
+## 必要なもの
 
-## Quick start
+macOS（Apple silicon / Intel）、Go 1.26以降、Python 3.11以降、
+[uv](https://github.com/astral-sh/uv)。
+
+**対応環境はmacOSのみ**です。GoとPythonの部分自体は移植可能ですが、常駐・スケジュー
+リング層はlaunchdで、systemdやWindows向けの同等物は用意していません。
+
+## クイックスタート
 
 ```bash
 make setup
@@ -58,55 +56,61 @@ make model
 make demo
 ```
 
-`make model` needs no data and no network: it generates a synthetic season,
-fits the model on the earlier dates, solves the policy table, verifies it by
-forward simulation, and backtests it.
+`make model` はデータもネットワークも不要です。合成シーズンを生成し、前半の日付で学習し、
+方策表を解き、前向きシミュレーションで検証し、バックテストまで走ります。
 
-`make demo` runs the whole thing end to end — it moves a day's races to start a
-few minutes from now, builds a plan bundle, starts `votingd` on the **paper
-driver**, arms the day, and lets the daemon submit and reconcile each race on
-schedule. No account, no network, no credentials.
+`make demo` は全経路を通します。ある1日のレースを数分後の発走に付け替え、計画バンドルを
+作り、**紙投票ドライバ**で `votingd` を起動し、その日を武装し、デーモンが各レースを
+時刻どおりに送信・照合するところまで動かします。アカウントもネットワークも認証情報も
+不要です。
 
-## Submitting to the real contest
+## 実際の大会へ送信する場合
 
-The live driver (`--driver live`) submits to the official contest endpoint with
-your own contest account, read from `KEIBA_LOGIN_ID` and `KEIBA_PASSWORD`.
+実ドライバ（`--driver live`）は、`KEIBA_LOGIN_ID` と `KEIBA_PASSWORD` から読んだ
+参加者自身のアカウントで、公式エンドポイントへ送信します。
 
-**It only works while the contest is accepting votes.** The 2026 contest closed
-on 21 September 2026; outside a contest window the endpoint rejects every
-submission, so `--driver live` has nothing to talk to. The paper driver is what
-makes the rest of the repository useful after that date, and it is the default
-for exactly that reason.
+**これは大会が投票を受け付けている期間しか動きません。** 2026年の大会は2026年9月21日に
+終了しました。大会期間外はエンドポイントがすべての送信を拒否するため、`--driver live`
+には話す相手がいません。その日以降もこのリポジトリを使えるものにしているのが紙投票
+ドライバであり、既定になっているのもそのためです。
 
-The runtime will not submit anything unless, all at once: the policy enables
-submission, the policy's date matches the plan's date, a date-scoped
-environment variable matches the policy, an operator arms the day against the
-bundle's exact SHA-256, and no kill-switch file is present. That is five
-deliberate steps, and it is not accidental — see [docs/06-safety.md](docs/06-safety.md).
+送信が起きるには、次が同時に成立している必要があります。
 
-## Data
+1. ドライバが `live` である
+2. ポリシーが送信を有効にしている
+3. ポリシーの日付と計画の日付が一致している
+4. 日付スコープの環境変数がポリシーと一致している
+5. 運用者がバンドルのSHA-256を明示して当日を武装している
 
-**This repository ships no race data.** Historical odds and results come with
-third-party terms this project cannot pass on, and the captures behind the
-original work run to tens of gigabytes.
+加えて、キルスイッチファイルが存在すれば何も送信されません。5段階あるのは意図的です。
+詳細は [docs/06-safety.md](docs/06-safety.md) を参照してください。
 
-What it ships instead is the schema
-([docs/04-data-contract.md](docs/04-data-contract.md)) and a generator that
-produces the same shape with known ground truth. Point the pipeline at your own
-panel and everything works the same way.
+## データ
 
-## Documentation
+**本リポジトリはレースデータを一切同梱していません。** 過去のオッズと結果には本プロジェクト
+が再配布できない第三者の条件が付いており、元の研究で使った収集データは数十GBに達します。
+
+代わりに同梱しているのは、スキーマ（[docs/04-data-contract.md](docs/04-data-contract.md)）と、
+同じ形で真の確率が既知のデータを作る生成器です。自分のパネルを指定すれば、同じように
+動きます。
+
+## ドキュメント
 
 | | |
 |---|---|
-| [01-quickstart.md](docs/01-quickstart.md) | From clone to a submitted paper vote |
-| [02-voting-runtime.md](docs/02-voting-runtime.md) | States, journal, recovery, reconciliation |
-| [03-launchd.md](docs/03-launchd.md) | Running it as a macOS agent |
-| [04-data-contract.md](docs/04-data-contract.md) | The panel format, and bringing your own data |
-| [05-model-pipeline.md](docs/05-model-pipeline.md) | Features, fitting, the dynamic program |
-| [06-safety.md](docs/06-safety.md) | Every gate between a plan and a submission |
+| [01-quickstart.md](docs/01-quickstart.md) | cloneから紙投票の送信まで |
+| [02-voting-runtime.md](docs/02-voting-runtime.md) | 状態、ジャーナル、復帰、照合 |
+| [03-launchd.md](docs/03-launchd.md) | macOSエージェントとしての運用 |
+| [04-data-contract.md](docs/04-data-contract.md) | パネル形式と自前データの持ち込み方 |
+| [05-model-pipeline.md](docs/05-model-pipeline.md) | 特徴量、学習、動的計画 |
+| [06-safety.md](docs/06-safety.md) | 計画から送信までの全ゲート |
 
-## Licence
+そのほか [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md)、
+[DISCLAIMER.md](DISCLAIMER.md)。
 
-Apache-2.0. See [LICENSE](LICENSE), [NOTICE](NOTICE) and
-[DISCLAIMER.md](DISCLAIMER.md).
+ソースコード中のコメントは英語です（OSSの一般的な慣行に合わせています）。
+日本語の説明は上記ドキュメントに集約しています。
+
+## ライセンス
+
+Apache-2.0。[LICENSE](LICENSE)、[NOTICE](NOTICE)、[DISCLAIMER.md](DISCLAIMER.md) を参照。

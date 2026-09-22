@@ -1,145 +1,136 @@
-# The model pipeline
+# モデルパイプライン
 
 ```
-quoted odds at decision time
+判断時点の公表オッズ
    │
-   ├─► market probabilities        (overround removed, no fitted parameter)
-   └─► Harville ordered probability (from the win pool)
-   │
-   ▼
-two-column log-linear model  ──►  p = 0.95 · market + 0.05 · model
-   │
-   ├─ policy table path:  (races remaining, bank) → price band, tickets, stake
-   │                      then pick the combinations nearest that price
-   └─ target path:        candidate filter → required stake → knapsack
+   ├─► 市場確率            （オーバーラウンド除去、推定パラメータなし）
+   └─► Harville順序確率    （単勝プールから）
    │
    ▼
-plan bundle (hashed)  ──►  votingd
+2列のlog-linearモデル  ──►  p = 0.95 × 市場 + 0.05 × モデル
+   │
+   ├─ 方策表の経路: (残りレース数, 所持pt) → 価格帯・点数・1点あたり金額
+   │                 その価格に最も近い組合せを選ぶ
+   └─ 目標残高の経路: 候補フィルタ → 必要額 → ナップサック
+   │
+   ▼
+計画バンドル（ハッシュ付き）  ──►  votingd
 ```
 
-## Features
+## 特徴量
 
-Two columns, both market-derived, for every ordered triple quoted in a race:
+各レースで建値のある順序付き3つ組すべてに対し、いずれも市場由来の2列。
 
-1. `log` of the trifecta pool's own overround-free probability
-2. `log` of the Harville probability implied by the win pool
+1. 3連単プール自身のオーバーラウンド除去済み確率の `log`
+2. 単勝プールから導いたHarville確率の `log`
 
-Devigging is proportional — `(1/odds) / Σ(1/odds)` — because it is the only
-choice that needs no fitted parameter. A power or logistic devig would put an
-estimated quantity into the column that is supposed to be the market's opinion.
+控除率の除去は比例配分——`(1/オッズ) / Σ(1/オッズ)`——です。推定パラメータを必要と
+しない唯一の選択だからです。べき乗やロジスティックによる除去は、**市場の意見である
+はずの列に推定量を混ぜてしまいます**。
 
-Harville assumes the remaining runners keep their relative win probabilities
-once the winner is removed. This is known to be wrong in a specific direction:
-it understates longshots' place chances. It is used here as a *second
-market-derived column*, never as a forecast on its own.
+Harvilleは、勝ち馬を除いたあと残りの馬が相対的な勝率を保つと仮定します。これは特定の
+方向に誤っていることが知られています——人気薄の複勝機会を過小評価します。ここでは
+**2列目の市場由来の列**として使っており、単独の予測としては使いません。
 
-## Fitting
+## 学習
 
-One softmax per race over its quoted combinations, with the winning
-combination as the observation. A race contributes one observation, not one
-per ticket, which is why a few hundred races is a small sample.
+1レースにつき、そのレースの建値のある組合せ上のsoftmaxを1つ、的中組合せを観測値と
+します。**1レースが1観測**であって、券1枚が1観測ではありません。数百レースが小標本
+である理由はこれです。
 
-The objective is the mean per-race conditional NLL plus a ridge term pulling
-the market coefficient toward 1 and the Harville coefficient toward 0 — that
-is, toward "use the quoted price and nothing else". Moving away from that
-prior has to be paid for in likelihood. Bounds are `[0.5, 1.5]` and `[0, 0.5]`,
-solved with L-BFGS-B.
+目的関数は、レースあたりの条件付きNLLの平均に、市場の係数を1へ、Harvilleの係数を0へ
+引き寄せるリッジ項を加えたものです。つまり「建値だけを使い、それ以外は使わない」へ
+向かう事前分布です。そこから離れるには尤度で対価を払う必要があります。境界は
+`[0.5, 1.5]` と `[0, 0.5]`、解法はL-BFGS-Bです。
 
-The split is chronological: `--holdout-from YYYYMMDD` holds out that date
-onward and the optimizer never sees it.
+分割は時系列です。`--holdout-from YYYYMMDD` でその日以降をholdoutにし、最適化器は
+一切見ません。
 
-### Read the result honestly
+### 結果を正直に読む
 
-On the shipped synthetic season the fit lands near `[0.935, 0.0]` with a
-holdout NLL improvement of about 0.015 out of 5.80.
+同梱の合成シーズンでは、係数は `[0.935, 0.0]` 付近に落ち、holdoutのNLL改善は5.80
+のうち約0.015でした。
 
-The Harville coefficient sits at its lower bound. That is a finding, not a
-bug: given the trifecta pool's own price, the win-pool-derived Harville term
-added nothing. The market column carries essentially all the information.
+**Harvilleの係数は下限に張り付いています。** これは不具合ではなく結果です。3連単
+プール自身の価格が与えられているとき、単勝プール由来のHarville項は何も足しません。
+市場の列が情報のほぼ全部を持っています。
 
-An improvement of 0.015 nats is not evidence of a betting edge. It is not
-evidence of calibration either. Do not report it as one.
+0.015natsの改善は、賭けのエッジの証拠ではありません。確率較正の証拠でもありません。
+そのように報告しないでください。
 
-## The policy table
+## 方策表
 
-A tournament is not the same problem as an edge. With a fixed number of races
-and a bank that has to reach a level, the right action depends on the state.
-The solver does backward induction over
+トーナメントはエッジとは別の問題です。レース数が固定で、資金がある水準に到達する
+必要があるとき、正しい行動は状態に依存します。ソルバは次の上で後ろ向き帰納を行います。
 
 ```
-state  = (races remaining, bank)
-action = (price band, number of tickets, stake per ticket)
+状態 = (残りレース数, 所持ポイント)
+行動 = (価格帯, 点数, 1点あたり金額)
 ```
 
-Each band carries a return rate `R`; one ticket at odds `O` hits with
-probability `R/O`. With `R < 1` every action loses money in expectation. The
-table is choosing *when to accept variance*, not finding value.
+各価格帯は回収率 `R` を持ち、オッズ `O` の1点は確率 `R/O` で的中します。`R < 1` なら
+どの行動も期待値では負けます。表がやっているのは価値を見つけることではなく、**いつ
+分散を受け入れるか**の選択です。
 
-The shipped bands are flat statutory-takeout figures, not measurements.
-Replace them with your own before you trust any number the solver prints —
-and note that feeding it `R > 1` is asserting an edge, which it will believe.
+同梱の価格帯は法定控除率ベースの数字であって、実測値ではありません。ソルバが出す
+数字を信じる前に、自分で測った値に置き換えてください。`R > 1` を与えることはエッジの
+主張であり、ソルバはそれを信じます。
 
-### Two things the solver does to keep itself honest
+### ソルバが自分を律するためにやっている2つのこと
 
-**It floors, it does not round.** The bank is discretized. The continuous next
-bank is evaluated at the grid point *below* it, which can only understate a
-state, never overstate it. Rounding to the nearest point overstates about half
-the transitions, and a maximizer finds exactly those. The reported value is
-therefore a lower bound on the policy's true reach probability.
+**丸めではなく切り捨てる。** 所持ポイントは離散化されています。連続値としての次の
+資金は、その**下側**のグリッド点で評価されます。これは状態を過小評価することはあっても、
+過大評価することはありません。最近傍への丸めは遷移のおよそ半分を過大評価し、最大化
+アルゴリズムはまさにそこを見つけます。したがって報告される値は、方策の真の到達確率の
+**下界**です。
 
-**It checks itself against conservation.** Money is conserved up to the return
-rate, so
+**保存則と照合する。** 資金は回収率の範囲でしか保存されないので、
 
 ```
-P(reach) ≤ R_max × initial_bank / goal
+P(到達) ≤ R_max × 初期資金 / 目標
 ```
 
-The solver raises rather than returning a table whose value exceeds this. That
-check caught a real bug during development: with nearest-point rounding the
-first implementation reported 0.4823 against a bound of 0.4211 — it was minting
-money from its own grid.
+ソルバはこれを超える値の表を返さず、例外を投げます。この検査は開発中に実際のバグを
+捕まえました。最近傍丸めだった初版は上界0.4211に対して**0.4823**を報告しており、
+自分のグリッドから資金を作っていたのです。
 
-Grid size trades accuracy for time. At `--bank-grid 25000` the value reads
-0.296; at 5,000 it reads 0.397; at 2,500, 0.408. All below the 0.421 bound, all
-solved in under a second.
+グリッドの細かさは精度と時間のトレードオフです。`--bank-grid 25000` では0.296、
+5,000では0.397、2,500では0.408。いずれも上界0.421を下回り、いずれも1秒未満で解けます。
 
-### Verify it forwards
+### 前向きに検証する
 
 ```bash
 .venv/bin/python -m pykeiba verify --table out/policy_table.json
 ```
 
-Replays the table forward under its own return-rate assumptions. Solved 0.397,
-simulated 0.406, bound 0.421 — consistent. A solved value *above* the
-simulation means the backward pass is wrong.
+表を、その表自身の回収率の仮定の下で前向きに回します。解0.397、シミュレーション0.406、
+上界0.421——整合しています。解の値がシミュレーション**より上**なら、後ろ向きの計算が
+間違っています。
 
-It also prints `mean_final_bank` (~810,000 from 1,000,000) and
-`median_final_bank` (~35,000). The second number is the one to sit with: the
-policy is a lottery ticket, and the median outcome is near zero.
+`mean_final_bank`（1,000,000に対して約810,000）と `median_final_bank`（約35,000）も
+表示します。**向き合うべきは2つ目の数字です。** この方策は宝くじであり、中央値の
+結果はほぼゼロです。
 
-## Allocation
+## 配分
 
-Two strategies share the features.
+2つの戦略が特徴量を共有します。
 
-**Policy table**: look up the state, buy the `k` combinations priced closest to
-the band, staking what the table says. Ranking inside the band mixes
-distance-in-price (95%) with the model's probability ranking (5%). Ranks are
-mixed rather than raw values so the two scales cannot fight.
+**方策表**: 状態を引き、価格帯に最も近い `k` 個の組合せを、表が言う金額で買います。
+帯の中での順位付けは、価格の距離（95%）とモデルの確率順位（5%）を混ぜます。生の値では
+なく**順位**を混ぜるので、2つのスケールが互いに争いません。
 
-**Target balance**: size each ticket so that a hit alone puts the bank at or
-above the goal —
+**目標残高**: 1回の的中だけで資金が目標以上になるよう各券を建てます。
 
 ```
-stake = 100 × ceil((goal − bank + allowance) / (100 × odds × odds_factor))
+金額 = 100 × ceil((目標 − 所持 + そのレースの枠) / (100 × オッズ × odds_factor))
 ```
 
-then run a 0/1 knapsack in 100-point units over the best 200 candidates by
-probability-per-point. Because tickets in one race are mutually exclusive, the
-objective is just the sum of their probabilities.
+そのうえで、確率÷金額の上位200候補に対し100ポイント単位で0/1ナップサックを解きます。
+同一レースの券は排他なので、目的関数は単にそれらの確率の和です。
 
-`odds_factor` defaults to 0.80 and it is not a fudge. A winning ticket settles
-below the price you bought at, because money keeps arriving after you bet.
-Sizing against the full quote systematically undershoots the target.
+`odds_factor` の既定は0.80で、これはごまかしではありません。**的中券は買った価格より
+下で精算されます。** 賭けた後も金が入り続けるからです。建値そのままで金額を決めると、
+目標に系統的に届きません。
 
-Both are optimal *within one race's budget*. Neither is a globally optimal
-multi-race strategy, and neither models what other entrants are doing.
+どちらも**1レースの予算の中では最適**です。どちらも多レース・多参加者を通した大域最適
+ではありませんし、他の参加者が何をしているかもモデル化していません。

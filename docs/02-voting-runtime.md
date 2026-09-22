@@ -1,22 +1,21 @@
-# The voting runtime
+# 投票ランタイム
 
-`votingd` is a single-writer daemon that owns one policy, one state directory,
-and one day's races. Its job is narrow on purpose: it does not decide anything.
-It receives a plan that was frozen and hashed before it started, submits each
-race once, and then finds out what the other side recorded.
+`votingd` は、1つのポリシー、1つの状態ディレクトリ、1日分のレースを所有する
+単一書き込みデーモンです。役割は意図的に狭くしてあります。**何も判断しません。**
+起動前に凍結・ハッシュ化された計画を受け取り、各レースを1回だけ送信し、その後
+相手側が何を記録したのかを確かめます。
 
-## Why the decision is frozen before the daemon sees it
+## なぜデーモンが見る前に判断を凍結するのか
 
-Everything interesting — probabilities, stakes, which combinations — happens in
-Python and ends in a JSON bundle with a SHA-256 over its own content. The
-daemon verifies that hash, an operator arms the day by typing the same hash
-back, and only then can a submission happen.
+面白い部分——確率、金額、どの組合せを買うか——はすべてPython側で起き、自分自身の
+内容に対するSHA-256を持つJSONバンドルとして終わります。デーモンはそのハッシュを
+検証し、運用者が同じハッシュを打ち返して当日を武装し、そこで初めて送信が起こりえます。
 
-This is what makes a run auditable after the fact. The plan cannot have changed
-between "what the model said" and "what was submitted", because both sides hold
-the same digest and the runtime re-derives it rather than trusting the field.
+これが事後の監査可能性を作っています。「モデルが言ったこと」と「送信されたもの」の
+あいだで計画が変わりようがないのは、両側が同じダイジェストを持ち、ランタイムが
+フィールドの値を信用せずに再計算するからです。
 
-## States
+## 状態
 
 ```
 DISCOVERED ──► VALIDATED ──► ARMED ──► POSTING ──► PENDING_CONFIRMATION ──► CONFIRMED
@@ -28,69 +27,66 @@ DISCOVERED ──► VALIDATED ──► ARMED ──► POSTING ──► PENDI
                    ├──► EXPIRED └──► KILLED
 ```
 
-The states worth understanding are the unhappy ones.
+理解しておく価値があるのは、うまくいかなかったほうの状態です。
 
-**AMBIGUOUS** means the submission was sent and the outcome is unknown: a
-timeout, a dropped connection, a response that did not parse. The daemon never
-retries an ambiguous submission. Retrying risks a second vote on a race that
-already has one, and on a platform where one race takes one vote that is
-unrecoverable. It stops the day instead and leaves the decision to a human.
+**AMBIGUOUS** は、送信はされたが結果が不明という意味です。タイムアウト、接続断、
+解釈できない応答。デーモンは曖昧な送信を**決して再試行しません**。再試行は、すでに
+投票済みのレースに2票目を投じる危険があり、1レース1票のプラットフォームでは
+取り返しがつきません。代わりにその日を停止し、判断を人間に委ねます。
 
-**CONFIRMED_EXISTING** means the read-back found a vote that the daemon did not
-knowingly place — almost always its own submission from before a crash. This is
-the state that makes restarts safe.
+**CONFIRMED_EXISTING** は、読み返しで、デーモンが自覚的には置いていない投票が
+見つかったという意味です。ほぼ常に、クラッシュ前の自分自身の送信です。再起動を
+安全にしているのはこの状態です。
 
-**CONFLICT** means the read-back found something different from what was sent.
-That is a hard stop.
+**CONFLICT** は、読み返した内容が送信した内容と違っていたという意味です。これは
+ハードストップです。
 
-## Importing and arming are two steps, and both are checked
+## importとarmは別の段階で、両方が検査される
 
-`import-day` validates a bundle and stores each plan as `VALIDATED`.
-`arm-day` requires the bundle's SHA-256 typed back, and requires every plan in
-it to match what was imported — both the payload hash **and** the schedule.
+`import-day` はバンドルを検証し、各計画を `VALIDATED` として保存します。
+`arm-day` はバンドルのSHA-256を打ち返すことを要求し、さらにバンドル内の各計画が
+importされたものと一致することを要求します——**ペイロードのハッシュと、スケジュール
+の両方**です。
 
-The schedule check is there because the payload hash does not cover it. A
-payload is `race_id`, marks and bets; re-planning the same selections for a
-different post time leaves that hash identical while the bundle hash moves.
-Without the schedule comparison an operator could confirm today's bundle and
-arm yesterday's timings, which is how four races were once armed straight into
-`EXPIRED`. Re-import after re-planning.
+スケジュールの検査があるのは、ペイロードのハッシュがそれを含まないからです。
+ペイロードは `race_id`・印・買い目であり、同じ買い目を別の発走時刻で組み直しても
+そのハッシュは変わらず、バンドルのハッシュだけが変わります。スケジュールを比較しないと、
+運用者が今日のバンドルを確認したつもりで昨日のタイミングを武装できてしまいます。実際に
+それで4レースが武装直後に `EXPIRED` になりました。組み直したら再importしてください。
 
-## Crash recovery
+## クラッシュからの復帰
 
-The journal is append-only and fsynced per event, and `POSTING` is written
-*before* the network call, not after. So after a crash the daemon knows a
-submission may have been in flight, and the recovery rule is: a race found in
-`POSTING` is **GET-only**. It queries, and it accepts whatever the answer is. It
-never re-submits to find out.
+ジャーナルは追記専用でイベントごとにfsyncされ、`POSTING` はネットワーク呼び出しの
+**前**に書かれます（後ではありません）。そのためクラッシュ後、デーモンは送信が飛んでいた
+可能性を知っており、復帰の規則はこうなります。**`POSTING` で見つかったレースはGETのみ**。
+問い合わせて、返ってきた答えをそのまま受け入れます。確かめるために再送はしません。
 
-This is why `KeepAlive` in the launchd agent is safe. A restarted daemon
-converges on what actually happened rather than on what it intended.
+launchdエージェントの `KeepAlive` が安全なのはこのためです。再起動したデーモンは、
+自分が意図したことではなく、実際に起きたことに収束します。
 
-## Reconciliation
+## 照合
 
-Confirmation is not "the POST returned 200". The daemon reads the vote back and
-compares it, field by field, against the payload it holds. With
-`require_exact_get_reconciliation` (the default), anything that differs is a
-`CONFLICT`.
+確認とは「POSTが200を返した」ことではありません。デーモンは投票を読み返し、手元の
+ペイロードとフィールド単位で比較します。`require_exact_get_reconciliation`（既定）
+では、1つでも違えば `CONFLICT` です。
 
-An empty read-back before submission is treated as "no vote yet" — and only in
-a deliberately narrow case: HTTP 200, the expected operation, status `NG`, and
-no reason text. Any other shape stays fail-closed.
+送信前の空の読み返しは「まだ投票がない」と扱われますが、これは意図的に狭い場合に
+限られます。HTTP 200、期待した操作、ステータス `NG`、理由テキストなし。それ以外の形は
+すべてfail-closedのままです。
 
-## Interfaces
+## インターフェース
 
 | | |
 |---|---|
-| Control | Unix socket, mode 0600, in the state directory. `votectl` speaks to this. |
-| Status | Read-only HTTP on loopback. Non-loopback binds are refused unless the policy says otherwise. |
-| Journal | `events.jsonl`, append-only, fsynced per event |
-| Snapshot | `snapshot.json`, atomically renamed |
+| 制御 | Unixソケット、モード0600、状態ディレクトリ内。`votectl` がここへ話す |
+| 状態参照 | ループバック上の読み取り専用HTTP。ポリシーが許さない限り非ループバックへのbindは拒否 |
+| ジャーナル | `events.jsonl`、追記専用、イベントごとにfsync |
+| スナップショット | `snapshot.json`、アトミックなrename |
 
-The control socket doubles as the process lock. A second daemon on the same
-state directory cannot start, so there is never more than one writer.
+制御ソケットはプロセスロックも兼ねています。同じ状態ディレクトリに対して2つ目の
+デーモンは起動できないので、書き込み手が2つになることはありません。
 
-## The driver interface
+## ドライバインターフェース
 
 ```go
 type API interface {
@@ -100,17 +96,17 @@ type API interface {
 }
 ```
 
-Two implementations ship:
+実装は2つ同梱しています。
 
-**`paper`** (the default) keeps votes in a local JSON file with a simulated
-balance. It answers the same empty-precheck error the live endpoint does, so
-the runtime's fail-closed logic is exercised rather than bypassed. It needs no
-account and no network, and it is the only driver that works outside a contest
-window.
+**`paper`**（既定）は、投票をローカルのJSONファイルに模擬残高とともに保持します。
+実エンドポイントと同じ空precheckエラーを返すので、ランタイムのfail-closed論理は
+迂回されずに実行されます。アカウントもネットワークも不要で、**大会期間外に動く唯一の
+ドライバ**です。認証情報も要求しません（何も認証しないので、要求すれば形だけの儀式に
+なり、launchd配下では毎レースが届きもしないログインで失敗します）。
 
-**`live`** talks to the official contest endpoint. It requires a contest
-account and only functions while the contest is accepting votes. The 2026
-contest closed on 21 September 2026, so today it will fail at submission no
-matter how the rest is configured. That is upstream behaviour, not a bug here.
+**`live`** は公式の大会エンドポイントへ話します。大会アカウントが必要で、大会が投票を
+受け付けている期間しか機能しません。2026年の大会は2026年9月21日に終了したので、
+今日この設定をどう組んでも送信段階で失敗します。これは上流の挙動であって、本コードの
+不具合ではありません。
 
-Selection is `--driver`, and it is recorded in the daemon's first log line.
+選択は `--driver` で、デーモンの最初のログ行に記録されます。

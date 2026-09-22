@@ -1,39 +1,43 @@
-# Disclaimer
+# 免責事項
 
-**Read this before running anything with `--driver live`.**
+**`--driver live` で何かを動かす前に読んでください。**
 
-## This software operates on contest points
+## 本ソフトウェアが扱うのは大会の仮想ポイントです
 
-It was written for the AI 競馬予想マスターズ 2026 contest, which is scored in
-virtual points. Nothing in this repository buys a real betting ticket, and no
-part of it is a wagering interface for real money.
+AI競馬予想マスターズ2026のために書かれたもので、この大会は仮想ポイントで採点されます。
+本リポジトリのどの部分も実際の馬券を購入しませんし、実際の金銭を賭けるための
+インターフェースでもありません。
 
-## It does not give you an edge
+## エッジを与えるものではありません
 
-The model here has two market-derived features. The dynamic program assumes
-every price band pays back less than it takes in, because that is what
-pari-mutuel pools do. Across any run the expected final bank is **below** the
-starting bank; the verification step prints that number so it cannot be missed.
+ここにあるモデルの特徴量は市場由来の2列だけです。動的計画は、どの価格帯も取った分より
+少なく払い戻すことを前提にしています。パリミュチュエル方式とはそういうものだからです。
+どのような実行においても**最終残高の期待値は初期資金を下回り**、検証段階はその数字を
+見落としようがない形で表示します。
 
-A strategy that maximizes the chance of reaching a target does so by accepting
-a very high chance of losing most of the bank. In the shipped configuration the
-median outcome is near zero. If you adapt this to real money, that median is
-what you should expect.
+目標到達確率を最大化する戦略は、**資金の大半を失う確率が非常に高いこと**と引き換えに
+それを実現します。同梱の設定では、結果の中央値はほぼゼロです。これを実際の金銭に
+転用するなら、期待すべきはその中央値のほうです。
 
-## It is not advice
+## 助言ではありません
 
-Nothing here is investment, financial or betting advice. No warranty is given,
-express or implied, including fitness for any particular purpose. You are
-responsible for what you run and for any losses.
+ここにあるものは投資・金融・賭けに関する助言ではありません。明示・黙示を問わず、
+特定目的への適合性を含むいかなる保証も提供しません。何を実行するか、そしてそれに伴う
+損失について、責任を負うのはあなたです。
 
-## Legal and account use
+## 法令とアカウントの利用について
 
-* Betting on horse racing is restricted to adults (20 and over in Japan) and is
-  illegal in many jurisdictions. Complying with the law where you are is your
-  responsibility.
-* Automating access to any service is governed by that service's terms. Read
-  them. Using the live driver against an account is your own act, under your
-  own agreement with that service.
-* If gambling is causing harm to you or someone you know, support is available.
-  In Japan: 全国ギャンブル依存症家族の会, and the Ministry of Health, Labour and
-  Welfare's 依存症相談拠点 directory.
+* 日本において、競馬の勝馬投票券を購入できるのは**20歳以上**に限られます。
+  国や地域によっては賭博自体が違法です。自分のいる場所の法令を守る責任はあなたにあります。
+* サービスへの自動アクセスは、そのサービスの利用規約に従います。**読んでください。**
+  実ドライバをアカウントに対して使うことは、あなた自身の行為であり、あなた自身と
+  そのサービスとの契約の下で行われます。
+* 収集対象サイトの利用規約と `robots.txt` の遵守も、利用者の責任です。
+
+## 依存症について
+
+賭博があなた自身や身近な人に害を及ぼしているなら、相談できる窓口があります。
+
+* 全国ギャンブル依存症家族の会
+* 厚生労働省の「依存症相談拠点」一覧（各都道府県の精神保健福祉センター等）
+* 各自治体の精神保健福祉センター

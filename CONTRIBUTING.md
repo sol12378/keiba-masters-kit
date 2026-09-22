@@ -1,44 +1,42 @@
-# Contributing
+# コントリビューション
 
-## Before you open a pull request
+## プルリクエストを出す前に
 
 ```bash
 make test   # go vet, go test, pytest
 make lint   # ruff
-make model  # the full pipeline, no network, no data
+make model  # 全パイプライン。ネットワークもデータも不要
 ```
 
-CI runs the same on macOS, plus a gitleaks scan.
+CIはmacOS上で同じものを実行し、加えてgitleaksによる走査を行います。
 
-## Things this project will not accept
+## 受け取れないもの
 
-**Race data.** No odds, results, payouts or captured pages, in any format, at
-any size. The inputs carry third-party terms. If a test needs data, extend
-`pykeiba.synth`.
+**レースデータ。** オッズ、結果、払戻、収集したページ——形式もサイズも問いません。
+入力には第三者の条件が付いています。テストにデータが必要なら `pykeiba.synth` を
+拡張してください。
 
-**Claims of an edge without evidence that survives a chronological holdout.**
-A backtest that improves because it read a settlement field, a final price, or
-a race after the split is not a finding. `docs/04-data-contract.md` lists the
-rules the loader enforces and why.
+**時系列holdoutを通らないエッジの主張。** 精算フィールド、最終オッズ、分割より後の
+レースを読んだために改善したバックテストは、発見ではありません。ローダーが強制する
+規則とその理由は [docs/04-data-contract.md](docs/04-data-contract.md) にあります。
 
-**Credentials anywhere except the environment.** Not in a config, not in a
-plist, not in a test fixture.
+**環境変数以外の場所に置かれた認証情報。** 設定ファイルにも、plistにも、テストの
+フィクスチャにも置かないでください。
 
-## Things it wants
+## 歓迎するもの
 
-- A collector that emits the panel format for a source you have the right to
-  read, kept polite by default.
-- Better return-rate estimation for the policy table's price bands. The
-  shipped numbers are statutory takeout figures, not measurements.
-- Platform support beyond macOS — but as an addition to `scripts/`, not by
-  weakening what already works.
+* あなたが読む権利を持つデータ源に対する、パネル形式を出力する収集スクリプト。
+  既定で行儀よく動くもの。
+* 方策表の価格帯に対する、より良い回収率の推定。同梱の数字は法定控除率であって
+  実測値ではありません。
+* macOS以外への対応。ただし既存の動作を弱める形ではなく、`scripts/` への追加として。
 
-## Style
+## スタイル
 
-Go: `gofmt`, standard library first. Python: `ruff`, 120 columns, type hints on
-public functions.
+Go: `gofmt`、標準ライブラリ優先。Python: `ruff`、120桁、公開関数には型注釈。
 
-Comments explain *why*, especially where the code is deliberately conservative
-— the floor-not-round rule in `pykeiba/dp.py`, the GET-only recovery in
-`internal/voting`. If you change one of those, change its comment in the same
-commit.
+**コメントは「なぜ」を説明してください。** 特に、意図的に保守的にしてある箇所——
+`pykeiba/dp.py` の「丸めずに切り捨てる」規則、`internal/voting` のGETのみによる復帰——
+がそうです。それらを変更するなら、同じコミットでコメントも変更してください。
+
+ソースコード中のコメントは英語で統一しています。日本語の説明は `docs/` に置いてください。

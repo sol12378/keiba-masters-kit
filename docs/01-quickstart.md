@@ -1,9 +1,8 @@
-# Quickstart
+# クイックスタート
 
-From a clone to a submitted (paper) vote. About ten minutes, most of it waiting
-for the scheduler.
+cloneから紙投票の送信まで。所要10分程度で、そのほとんどはスケジューラ待ちです。
 
-## 1. Install
+## 1. 導入
 
 ```bash
 git clone https://github.com/sol12378/keiba-masters-kit.git
@@ -11,52 +10,52 @@ cd keiba-masters-kit
 make setup
 ```
 
-`make setup` creates `.venv`, installs the Python package in editable mode, and
-builds `bin/votingd` and `bin/votectl`.
+`make setup` は `.venv` を作り、Pythonパッケージをeditableで入れ、`bin/votingd` と
+`bin/votectl` をビルドします。
 
-## 2. Build a model with no data
+## 2. データなしでモデルを作る
 
 ```bash
 make model
 ```
 
-Five steps run in sequence:
+5つの段階が順に走ります。
 
-| Step | What it does | Typical output |
+| 段階 | 内容 | 典型的な出力 |
 |---|---|---|
-| `synth` | Writes a synthetic season under `data/synthetic` | 72 races, ~60,000 quoted trifecta combinations |
-| `train` | Fits two coefficients on the earlier dates | `[0.935, 0.0]`, holdout NLL improvement ≈ 0.015 |
-| `policy-table` | Solves `(races remaining, bank) → action` | ~27,000 states in under a second |
-| `verify` | Forward-simulates the table 20,000 times | simulated reach ≈ 0.41, mean final bank ≈ 810,000 |
-| `backtest` | Replays the panel through the table | one path, one or two hits at most |
+| `synth` | `data/synthetic` に合成シーズンを書き出す | 72レース、3連単の建値 約60,000通り |
+| `train` | 前半の日付で2つの係数を推定 | `[0.935, 0.0]`、holdout NLL改善 約0.015 |
+| `policy-table` | `(残りレース数, 所持pt) → 行動` を解く | 約27,000状態を1秒未満で |
+| `verify` | 方策表を20,000回前向きに回す | 到達率 約0.41、最終残高の平均 約810,000 |
+| `backtest` | パネルを方策表で再生 | 1経路あたり的中は多くて1〜2回 |
 
-Two numbers deserve a look before anything else.
+何より先に見るべき数字が2つあります。
 
-`upper_bound_on_reach` is `R_max × initial / goal` — the most any policy can
-achieve when money is conserved up to the return rate. `value_at_initial_bank`
-must sit below it. If it does not, the solver refuses to return a table at all,
-because a value above the bound means the dynamic program is gaining money from
-its own discretization rather than from a strategy.
+`upper_bound_on_reach` は `R_max × 初期資金 / 目標` です。資金が回収率の範囲でしか
+保存されない以上、どんな方策もこれを超えられません。`value_at_initial_bank` はこれを
+下回っていなければなりません。下回らない場合、ソルバは表を返さずに例外を投げます。
+上界を超える値は、戦略ではなく**動的計画が自分の離散化から資金を作っている**ことを
+意味するからです。
 
-`mean_final_bank` is below the starting bank. It always will be: there is no
-edge anywhere in this pipeline.
+`mean_final_bank` は初期資金を下回ります。常にそうなります。このパイプラインのどこにも
+エッジは存在しないからです。
 
-## 3. Run the whole loop locally
+## 3. 全経路をローカルで回す
 
 ```bash
 make demo
 ```
 
-The demo:
+デモがやること。
 
-1. clears today's state directory under `var/`;
-2. moves one day's races to start ten minutes from now;
-3. renders a policy for that date and builds a plan bundle;
-4. starts `votingd` on the paper driver;
-5. imports and arms the day against the bundle's SHA-256;
-6. leaves the daemon running so you can watch it work.
+1. 当日の状態ディレクトリを `var/` 以下でクリアする
+2. ある1日のレースを10分後の発走に付け替える
+3. その日付のポリシーを生成し、計画バンドルを作る
+4. 紙投票ドライバで `votingd` を起動する
+5. バンドルのSHA-256を明示して、その日をimport・武装する
+6. デーモンを起動したまま残すので、動作を観察できる
 
-In another shell:
+別のシェルで:
 
 ```bash
 ./bin/votectl --policy var/policy_<date>.json status
@@ -64,32 +63,30 @@ cat var/voting-<date>/paper_state.json
 tail -f var/voting-<date>/events.jsonl
 ```
 
-A race moves `DISCOVERED → VALIDATED → ARMED → POSTING → PENDING_CONFIRMATION →
-CONFIRMED`. The submission happens 300 seconds before post time and the
-confirmation read-back follows about a minute later.
+各レースは `DISCOVERED → VALIDATED → ARMED → POSTING → PENDING_CONFIRMATION →
+CONFIRMED` と遷移します。送信は発走300秒前、読み返しによる確認はその約1分後です。
 
-`paper_state.json` is the paper driver's ledger: the votes it accepted and the
-simulated balance, starting from 1,000,000. It falls by exactly what the plan
-staked, so it is the quickest way to check that what was submitted is what the
-planner decided.
+`paper_state.json` は紙投票ドライバの台帳です。受け付けた投票と、1,000,000から始まる
+模擬残高が入っています。残高は計画が賭けた額だけ正確に減るので、**送信された内容が
+プランナーの決定と一致しているか**を最も手早く確認できる場所です。
 
-Stop the demo with Ctrl-C.
+Ctrl-Cでデモを止めます。
 
-## 4. Point it at your own data
+## 4. 自分のデータを使う
 
-The pipeline reads a directory of per-race JSON files. Write your own collector
-that emits that shape, then:
+パイプラインはレースごとのJSONファイルが並んだディレクトリを読みます。同じ形を出力する
+収集スクリプトを自分で書けば、そのまま使えます。
 
 ```bash
-.venv/bin/python -m pykeiba train  --panel /path/to/panel --out out/model.json
+.venv/bin/python -m pykeiba train    --panel /path/to/panel --out out/model.json
 .venv/bin/python -m pykeiba backtest --panel /path/to/panel --model out/model.json \
     --table out/policy_table.json
 ```
 
-The format, and what must be true about `captured_at`, is in
-[04-data-contract.md](04-data-contract.md).
+形式と、`captured_at` について守らなければならないことは
+[04-data-contract.md](04-data-contract.md) にあります。
 
-## 5. Run it under launchd
+## 5. launchdの下で動かす
 
 ```bash
 ./scripts/launchd.sh install --policy var/policy_<date>.json --driver paper
@@ -98,4 +95,5 @@ The format, and what must be true about `captured_at`, is in
 ./scripts/launchd.sh uninstall
 ```
 
-See [03-launchd.md](03-launchd.md), particularly the part about sleep.
+[03-launchd.md](03-launchd.md) を参照してください。特にスリープの項は読んでおいて
+ください。

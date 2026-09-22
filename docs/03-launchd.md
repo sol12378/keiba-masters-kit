@@ -1,18 +1,17 @@
-# Running under launchd
+# launchdでの運用
 
-macOS only. The Go and Python code is portable; this layer is not, and the kit
-does not pretend otherwise.
+macOS専用です。GoとPythonのコード自体は移植可能ですが、この層は違いますし、
+そのふりもしません。
 
-## Why a supervisor at all
+## そもそもなぜスーパーバイザが要るのか
 
-A race has one submission window, a few minutes wide, and it does not come
-back. A process that dies inside that window with nothing to restart it simply
-misses the race. `KeepAlive` turns a crash into a few seconds of downtime, and
-the recovery rule in [02-voting-runtime.md](02-voting-runtime.md) makes the
-restart safe: a race found mid-submission is resolved by reading the other
-side, never by submitting again.
+レースの送信ウィンドウは数分幅で一度きり、二度と来ません。そのウィンドウの中で
+プロセスが死に、再起動するものが何もなければ、そのレースは単に落ちます。`KeepAlive`
+はクラッシュを数秒のダウンタイムに変え、[02-voting-runtime.md](02-voting-runtime.md)
+の復帰規則が再起動を安全にします——送信途中で見つかったレースは、再送ではなく相手側を
+読むことで決着します。
 
-## Install
+## 導入
 
 ```bash
 ./scripts/launchd.sh install --policy var/policy_20260926.json --driver paper
@@ -21,95 +20,91 @@ side, never by submitting again.
 ./scripts/launchd.sh uninstall
 ```
 
-The script renders `launchd/templates/votingd.plist.template` into
-`~/Library/LaunchAgents/`, substituting the absolute project root, the policy
-path, the driver and the timezone. It runs `plutil -lint` before loading, then
-`launchctl bootout` (ignoring failure) and `launchctl bootstrap`.
+スクリプトは `launchd/templates/votingd.plist.template` を
+`~/Library/LaunchAgents/` へ展開し、プロジェクトの絶対パス、ポリシーのパス、ドライバ、
+タイムゾーンを埋めます。読み込む前に `plutil -lint` を通し、`launchctl bootout`
+（失敗は無視）してから `launchctl bootstrap` します。
 
-`--driver live` prompts for typed confirmation before installing. That is
-deliberate friction.
+`--driver live` は導入前にタイプ入力による確認を求めます。これは意図的な摩擦です。
 
-## The agent cannot submit unless you say so
+複数走らせる場合は `LABEL_PREFIX=...` でラベル接頭辞を変えてください。
 
-A launchd agent inherits almost nothing from your shell, so the date-scoped
-variable the policy requires (`KEIBA_ENABLE_SUBMISSION`) is simply absent. An
-agent installed and forgotten will start, serve status, and **refuse to arm a
-day**. That is the intended default.
+## 明示しない限りエージェントは送信できない
+
+launchdエージェントはシェルからほとんど何も継承しないので、ポリシーが要求する
+日付スコープの変数（`KEIBA_ENABLE_SUBMISSION`）は単に存在しません。導入して忘れられた
+エージェントは、起動し、状態を提供し、そして**当日の武装を拒否します**。これが意図した
+既定です。
 
 ```bash
 ./scripts/launchd.sh install --policy var/policy_20260926.json --enable-submission
 ```
 
-`--enable-submission` copies the policy's `required_environment` into the
-plist and prints what it set. The value is a date, not a credential — it is
-the operator saying "today", and the policy it is copied from is valid for
-exactly that day. Re-installing for another day requires another policy and
-another explicit flag.
+`--enable-submission` はポリシーの `required_environment` をplistへ複写し、何を
+設定したかを表示します。値は認証情報ではなく日付です——運用者が「今日」と言っている
+のと同じことで、複写元のポリシーはまさにその1日だけ有効です。別の日に導入し直すには、
+別のポリシーと、もう一度の明示的なフラグが必要です。
 
-Override the label prefix with `LABEL_PREFIX=...` if you run more than one.
+## 認証情報はplistに置かない
 
-## Credentials are still not in the plist
+plistは誰でも読めますし、バックアップにも入ります。テンプレートが設定するのは `TZ`
+だけです。
 
-A plist is world-readable and gets swept into backups. The template sets `TZ`
-and nothing else.
+紙投票ドライバは認証情報を一切必要としません。何も認証しないので、要求してもlaunchd
+エージェントが届きもしないログインで失敗するだけです。
 
-The paper driver needs no credentials at all — it authenticates nothing, so
-asking for them would only make a launchd agent fail on a login that was never
-going to reach a network.
-
-The live driver reads `KEIBA_LOGIN_ID` and `KEIBA_PASSWORD` from its
-environment. On macOS the reasonable place for them is the Keychain:
+実ドライバは `KEIBA_LOGIN_ID` と `KEIBA_PASSWORD` を環境から読みます。macOSでの
+妥当な置き場所はKeychainです。
 
 ```bash
 security add-generic-password -U -a "$(id -un)" -s local.keiba.login-id  -w
 security add-generic-password -U -a "$(id -un)" -s local.keiba.password  -w
 ```
 
-Then start the daemon from a wrapper that exports them, rather than putting
-them in `EnvironmentVariables`.
+そのうえで、`EnvironmentVariables` に書くのではなく、それらをexportするラッパーから
+デーモンを起動してください。
 
-## Sleep will cost you races
+## スリープするとレースを落とす
 
-This is the failure mode that matters most and launchd does not solve it. A
-sleeping Mac runs nothing. `ProcessType Interactive` asks macOS not to throttle
-the process under App Nap, but it does not keep the machine awake.
+これが最も重要な失敗モードで、launchdはこれを解決しません。**眠っているMacは何も
+実行しません。** `ProcessType Interactive` はApp Napによるスロットリングを避ける
+よう頼むだけで、マシンを起こし続けはしません。
 
-If you intend to be submitting on a schedule, hold a power assertion for the
-window:
+スケジュールに沿って送信するつもりなら、そのウィンドウのあいだ電源アサーションを
+保持してください。
 
 ```bash
 caffeinate -i -w $(pgrep -f 'bin/votingd')
 ```
 
-or `caffeinate -s` while on mains power. Check `pmset -g assertions` to confirm
-something is actually holding the machine up. Closing the lid on a laptop
-sleeps it regardless.
+あるいは電源接続時に `caffeinate -s`。実際に何かがマシンを起こし続けているかは
+`pmset -g assertions` で確認できます。ノートのふたを閉じれば、何をしていても
+スリープします。
 
-## If the daemon crashloops immediately
+## デーモンがすぐクラッシュループする場合
 
-Check `.err.log` and `.out.log` first. One cause is worth naming because the
-underlying error is misleading: a Unix socket path is limited to 104 bytes on
-macOS, and a project cloned into a deep directory pushes the control socket
-past it. `bind()` answers `EINVAL`, which reads as "invalid argument" and
-looks like a permissions problem.
+まず `.err.log` と `.out.log` を見てください。ひとつ、原因が誤解を招くので名前を
+挙げておく価値のあるものがあります。macOSではUnixソケットのパスが104バイトに制限
+されており、深いディレクトリにcloneすると制御ソケットがそれを超えます。`bind()` は
+`EINVAL` を返し、「invalid argument」という表示になるので、権限の問題に見えます。
 
-The daemon now refuses with an explicit message naming the length and the
-limit. The fix is to move the checkout somewhere shorter, or to point
-`interfaces.control_socket` at a short absolute path in the policy.
+現在のデーモンは、長さと制限を明示したメッセージで拒否します。対処は、チェックアウト
+をもっと短い場所へ移すか、ポリシーの `interfaces.control_socket` を短い絶対パスへ
+向けることです。
 
-## Logs
+## ログ
 
-`var/log/<label>.out.log` and `.err.log`. The daemon writes structured JSON
-lines, so:
+`var/log/<label>.out.log` と `.err.log`。デーモンは構造化JSONを1行ずつ書くので、
 
 ```bash
 tail -f var/log/local.keiba-masters-kit.votingd.out.log | jq .
 ```
 
-launchd does not rotate these. Rotate them yourself, or truncate between days.
+launchdはこれらをローテートしません。自分でローテートするか、日をまたぐ際に切り詰めて
+ください。
 
-## Checking it is really running
+## 本当に動いているかの確認
 
-`launchctl print gui/$(id -u)/<label>` shows the PID, the last exit status, and
-the number of restarts. A climbing restart count with no PID means the daemon
-is crashlooping — look at `.err.log`, not at `launchctl`.
+`launchctl print gui/$(id -u)/<label>` でPID、直近の終了状態、再起動回数が見えます。
+PIDがないまま再起動回数だけ増えていれば、デーモンはクラッシュループしています。
+その場合に見るべきは `launchctl` ではなく `.err.log` です。

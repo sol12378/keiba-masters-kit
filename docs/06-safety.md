@@ -1,97 +1,92 @@
-# Every gate between a plan and a submission
+# 計画から送信までの全ゲート
 
-The default configuration submits nothing anywhere. Getting a real vote out
-takes five separate, deliberate acts. This document lists them so you can
-check them, and so you can see what you are switching off if you remove one.
+既定の設定では、どこへも何も送信されません。実際に投票を1つ外へ出すには、独立した
+5つの意図的な行為が必要です。この文書はそれを列挙します。確認できるように、そして
+どれかを外すときに何を外すのかが見えるようにです。
 
-## The five gates
+## 5つのゲート
 
-**1. The driver.** `--driver paper` is the default and writes to a local file.
-Reaching the network needs `--driver live`, typed explicitly. Installing the
-launchd agent with `live` prompts for a typed confirmation first.
+**1. ドライバ。** `--driver paper` が既定で、ローカルのファイルに書きます。ネットワーク
+へ届かせるには `--driver live` を明示的に打つ必要があります。launchdエージェントを
+`live` で導入すると、先にタイプ入力による確認を求められます。
 
-**2. The policy enables submission.** `submission.enabled`, plus per-race and
-per-day caps, the stake unit, and the set of bet-id patterns allowed. A policy
-must be `frozen_for_implementation` to load at all.
+**2. ポリシーが送信を有効にしている。** `submission.enabled` と、レースあたり・日あたり
+の上限、金額単位、許可するbet-idパターンの集合。そもそもポリシーは
+`frozen_for_implementation` でなければ読み込まれません。
 
-**3. The policy's date matches the plan's date.** A rendered policy is valid
-for exactly one day. `plan.race_date` must equal `policy.connection_date`, and
-the scheduled post time must fall on that date in the policy's timezone.
-Yesterday's bundle cannot be replayed today.
+**3. ポリシーの日付と計画の日付が一致している。** 生成したポリシーはちょうど1日だけ
+有効です。`plan.race_date` は `policy.connection_date` と等しくなければならず、予定
+発走時刻はポリシーのタイムゾーンでその日付に入っていなければなりません。昨日のバンドル
+を今日再生することはできません。
 
-**4. A date-scoped environment variable matches.** The policy names it —
-`KEIBA_ENABLE_SUBMISSION=2026-09-26`. It is awkward on purpose: arming a day
-should be a decision someone makes that day, not a flag left set from last
-week.
+**4. 日付スコープの環境変数が一致している。** ポリシーがその名前を指定します——
+`KEIBA_ENABLE_SUBMISSION=2026-09-26`。これは意図的に面倒にしてあります。当日を武装
+するのは**その日に誰かが下す判断**であるべきで、先週から立てっぱなしのフラグであっては
+なりません。
 
-Under launchd, gate 4 has to be opted into explicitly:
-`scripts/launchd.sh install --enable-submission` copies the policy's
-`required_environment` into the plist and says what it set. Without the flag
-the agent runs but cannot arm anything, which is what an agent someone
-installed months ago should do.
+launchdの下では、ゲート4を明示的にオプトインする必要があります。
+`scripts/launchd.sh install --enable-submission` がポリシーの `required_environment`
+をplistへ複写し、何を設定したかを表示します。フラグがなければエージェントは起動しますが
+何も武装できません。これは何ヶ月も前に導入されたエージェントがそうあるべき姿です。
 
-**5. An operator arms the exact bundle.** `arm-day --confirm-sha256 <digest>`,
-where the digest must match the bundle's own hash, recomputed by the daemon
-from the content. A plan that changed by one point fails here.
+**5. 運用者が正確にそのバンドルを武装する。** `arm-day --confirm-sha256 <digest>`。
+ダイジェストはバンドル自身のハッシュと一致していなければならず、デーモンは内容から
+再計算します。1ポイントでも変わった計画はここで落ちます。
 
-And one that can stop everything at any moment:
+そして、いつでもすべてを止められるものが1つ。
 
-**The kill switch.** A file at the path the policy names (`var/STOP_VOTING` by
-default). Present, and nothing is submitted. Create it with `touch`; no process
-has to be signalled.
+**キルスイッチ。** ポリシーが指定するパスのファイル（既定は `var/STOP_VOTING`）。
+存在すれば何も送信されません。`touch` で作れます。プロセスにシグナルを送る必要は
+ありません。
 
 ```bash
-touch var/STOP_VOTING          # stop
-./bin/votectl --policy <p> kill --reason "..."   # stop and record why
+touch var/STOP_VOTING                            # 停止
+./bin/votectl --policy <p> kill --reason "..."   # 停止し、理由を記録する
 ```
 
-## Limits worth setting deliberately
+## 意図して設定すべき上限
 
-| Policy field | What it bounds |
+| ポリシーの項目 | 何を縛るか |
 |---|---|
-| `max_stake_per_race` | The most one race can cost |
-| `max_daily_total_stake` | The most a day can cost |
-| `max_bets_per_race` | Tickets per race |
-| `max_races` | Races in a day |
-| `max_post_requests` | Total submissions, ever, for this policy |
-| `allowed_bet_id_patterns` | Which pools may be bought |
-| `stake_unit` | Must be 100 |
+| `max_stake_per_race` | 1レースが使える最大額 |
+| `max_daily_total_stake` | 1日が使える最大額 |
+| `max_bets_per_race` | レースあたりの点数 |
+| `max_races` | 1日のレース数 |
+| `max_post_requests` | このポリシーでの送信回数の総計 |
+| `allowed_bet_id_patterns` | 買ってよい券種 |
+| `stake_unit` | 100でなければならない |
 
-The runtime checks these against the bundle at import, before anything is
-armed. A bundle that would breach a cap is rejected whole rather than
-partially submitted.
+ランタイムはimport時に、武装より前にこれらをバンドルと突き合わせます。上限を超える
+バンドルは部分的に送信されるのではなく、丸ごと拒否されます。
 
-## Behaviours that are not configurable
+## 設定で変えられない挙動
 
-**One submission per race.** Not a retry policy — a hard rule.
+**1レース1送信。** リトライ方針ではなく、ハードな規則です。
 
-**An ambiguous submission is never retried.** Timeout, dropped connection,
-unparseable response: the daemon marks the race `AMBIGUOUS`, halts the day, and
-waits for a human. Retrying could double-vote a race, which cannot be undone.
+**曖昧な送信は決して再試行しない。** タイムアウト、接続断、解釈できない応答。
+デーモンはそのレースを `AMBIGUOUS` とし、その日を停止し、人間を待ちます。再試行は
+レースに二重投票しうるもので、それは取り消せません。
 
-**A race found in `POSTING` after a restart is GET-only.** It asks what
-happened; it does not re-send to find out.
+**再起動後に `POSTING` で見つかったレースはGETのみ。** 何が起きたかを問い合わせる
+だけで、確かめるための再送はしません。
 
-**Confirmation is a read-back, not a status code.** The daemon compares the
-recorded vote field by field against what it sent, and any difference is a
-`CONFLICT`.
+**確認はステータスコードではなく読み返し。** デーモンは記録された投票を、送信した
+内容とフィールド単位で比較し、1つでも違えば `CONFLICT` です。
 
-## Credentials
+## 認証情報
 
-`KEIBA_LOGIN_ID` and `KEIBA_PASSWORD`, from the environment only. They are
-never written to the state directory, never logged, and deliberately absent
-from the launchd template — a plist is world-readable and ends up in backups.
-Keep them in the Keychain and export them from a wrapper.
+`KEIBA_LOGIN_ID` と `KEIBA_PASSWORD`、環境変数からのみ。状態ディレクトリに書かれる
+ことはなく、ログにも出ず、launchdテンプレートからも意図的に外してあります——plistは
+誰でも読めますし、バックアップにも入ります。Keychainに置き、ラッパーからexportして
+ください。
 
-The paper driver ignores them entirely.
+紙投票ドライバはこれらを完全に無視します。
 
-## After the contest closes
+## 大会終了後について
 
-The live endpoint only accepts votes while a contest is running. The 2026
-contest closed on 21 September 2026. Running `--driver live` now fails at
-submission regardless of how the five gates are set — that is the service's
-behaviour, not this code's.
+実エンドポイントは大会が開催されている期間しか投票を受け付けません。2026年の大会は
+2026年9月21日に終了しました。いま `--driver live` を動かせば、5つのゲートをどう設定
+していても送信段階で失敗します。それはこのコードではなく、サービス側の挙動です。
 
-Everything else still works. The paper driver exercises the identical state
-machine, ledger and reconciliation path, which is what makes the runtime
-useful to read and to build on after the fact.
+**それ以外はすべて動きます。** 紙投票ドライバは同一の状態機械、台帳、照合経路を通る
+ので、その日以降もこのランタイムを読み、その上に作ることができます。
