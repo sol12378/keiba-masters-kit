@@ -10,7 +10,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 PYTHON="${PYTHON:-.venv/bin/python}"
 PANEL="${PANEL:-data/synthetic}"
-FIRST_POST_IN="${FIRST_POST_IN:-7}"
+FIRST_POST_IN="${FIRST_POST_IN:-10}"
 EVERY="${EVERY:-2}"
 
 say() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
@@ -59,8 +59,6 @@ say "7/8  Start votingd on the paper driver and arm the bundle"
 # names.  It is deliberately awkward: arming a day has to be a decision
 # someone makes today, not a flag left on from last week.
 export KEIBA_ENABLE_SUBMISSION="${RACE_DATE:0:4}-${RACE_DATE:4:2}-${RACE_DATE:6:2}"
-export KEIBA_LOGIN_ID="${KEIBA_LOGIN_ID:-local}"
-export KEIBA_PASSWORD="${KEIBA_PASSWORD:-local}"
 ./bin/votingd --policy "var/policy_${RACE_DATE}.json" --driver paper \
   >> "var/votingd.${RACE_DATE}.log" 2>&1 &
 VOTINGD_PID=$!

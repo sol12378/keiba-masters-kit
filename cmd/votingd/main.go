@@ -71,7 +71,7 @@ func run(logger *slog.Logger) error {
 		return err
 	}
 	logger.Info("submission driver selected", "driver", *driverFlag)
-	service := voting.NewService(config, store, client, voting.EnvironmentCredentials, logger, time.Now)
+	service := voting.NewService(config, store, client, voting.CredentialsFor(*driverFlag), logger, time.Now)
 	httpService := voting.NewHTTPService(service, config, voting.BuildInfo{
 		Version: version, Commit: commit, BuildTime: buildTime,
 	})

@@ -53,6 +53,10 @@ Override the label prefix with `LABEL_PREFIX=...` if you run more than one.
 A plist is world-readable and gets swept into backups. The template sets `TZ`
 and nothing else.
 
+The paper driver needs no credentials at all — it authenticates nothing, so
+asking for them would only make a launchd agent fail on a login that was never
+going to reach a network.
+
 The live driver reads `KEIBA_LOGIN_ID` and `KEIBA_PASSWORD` from its
 environment. On macOS the reasonable place for them is the Keychain:
 
@@ -62,7 +66,7 @@ security add-generic-password -U -a "$(id -un)" -s local.keiba.password  -w
 ```
 
 Then start the daemon from a wrapper that exports them, rather than putting
-them in `EnvironmentVariables`. The paper driver needs neither.
+them in `EnvironmentVariables`.
 
 ## Sleep will cost you races
 

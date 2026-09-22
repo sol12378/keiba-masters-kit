@@ -35,3 +35,17 @@ func NewDriver(driverName string, config RuntimeConfig) (API, error) {
 		return nil, fmt.Errorf("unknown driver %q (want %q or %q)", driverName, DriverPaper, DriverLive)
 	}
 }
+
+// CredentialsFor returns the credentials provider that matches a driver.
+//
+// The paper driver authenticates nothing, so requiring KEIBA_LOGIN_ID and
+// KEIBA_PASSWORD from it would be theatre -- and worse than theatre under
+// launchd, where an agent inherits neither and every race fails on a login
+// that was never going to reach a network.  The live driver keeps reading them
+// from the environment, which is the only place they belong.
+func CredentialsFor(driverName string) CredentialsProvider {
+	if strings.EqualFold(strings.TrimSpace(driverName), DriverLive) {
+		return EnvironmentCredentials
+	}
+	return func() (string, string, error) { return "local", "local", nil }
+}
