@@ -1,0 +1,13 @@
+{
+ "_original_sha256": "748c1e51e876956e33a0adbcccda2153d5de48a22de3e9aecbf89707f097ae60",
+ "_published_note": "Published copy. Only opponent_leader_name was redacted; it is not read by build_vote_plan.py, which uses opponent_leader_points. Every other field, including the points that drove the decision, is unchanged.",
+ "captured_at": "2026-08-29T19:00:00+09:00",
+ "goal_points": 2000000,
+ "opponent_leader_name": "(redacted: another participant's handle)",
+ "opponent_leader_points": 1829540,
+ "race_date": "2026-08-30",
+ "schema_version": 1,
+ "self_name": "そる",
+ "source_url": "https://yoso.sp.netkeiba.com/masters/ai2026_student/ranking.html",
+ "status": "STALE_UNTIL_HEARTBEAT_REFRESH"
+}

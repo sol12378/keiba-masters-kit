@@ -1,0 +1,797 @@
+{
+ "_original_sha256": "73d9e7cb26ca8a4d2ef8582338cb3c80b67e7b4cd616a4b69a4b741a5d68aa85",
+ "_published_note": "Published copy. The absolute manifest paths were made repository-relative; nothing else was changed. The SHA-256 of each source file is unmodified, so the list still identifies the exact inputs.",
+ "blend": 0.05,
+ "coefficients": [
+  0.9265476143601139,
+  0.0
+ ],
+ "holdout_dates": [
+  "20260913",
+  "20260919"
+ ],
+ "holdout_races": 46,
+ "market_holdout_nll": 5.8987667347614785,
+ "model_holdout_nll": 5.895716383288191,
+ "model_id": "trifecta-loglinear-trained-through-20260912-v1",
+ "probability_caveat": "Small chronological holdout; no proven probability calibration or positive edge.",
+ "training_last_date": "20260912",
+ "training_races": 155,
+ "training_sources": [
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020302/snapshots/t10/0806d640478816d5/manifest.json",
+   "race_key": "2026082901020302",
+   "sha256": "2528c82b482be6376b53b72744a57ea56678e069d88a293ef82f6d6fa16e5f54"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020303/snapshots/t10/eecb151e320627ea/manifest.json",
+   "race_key": "2026082901020303",
+   "sha256": "f9030b92c61d16392b1b808397ce8385e8249a3f9a1afb4df70f440d46fab3ad"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020304/snapshots/t10/7542703b9cad371c/manifest.json",
+   "race_key": "2026082901020304",
+   "sha256": "33892e8f1f3b7774cc7038f6cc1b8263ada3d2ff33a379da34fc0fc192ecc31c"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020305/snapshots/t10/c5da69da9a4512f0/manifest.json",
+   "race_key": "2026082901020305",
+   "sha256": "1385db3b2bb2fa7b67cabb4c552aeac6e54f3f589e807f8c43de5ab78988993b"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020306/snapshots/t10/b3246eba54d68992/manifest.json",
+   "race_key": "2026082901020306",
+   "sha256": "20d3c18353bff8c3bbe52367bee206196f10480e637f6dba61958271df938713"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020307/snapshots/t10/76fc82a51bd33a51/manifest.json",
+   "race_key": "2026082901020307",
+   "sha256": "1291cf77b1cd62ba59120e676cd36ac32ab27571c3a542563ec07d1f97e4f8fa"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020309/snapshots/t10/d007591c5415dd0b/manifest.json",
+   "race_key": "2026082901020309",
+   "sha256": "e331664c10247adce99c7a212cd75672f54f9b5425831835459f3608b97c7207"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020310/snapshots/t10/4d07ee002ebf6183/manifest.json",
+   "race_key": "2026082901020310",
+   "sha256": "1f791a4012e7301b51e2c11228a5860f6942f19e2b6c0489812aa765e18c0832"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020311/snapshots/t10/590159ad080f84e7/manifest.json",
+   "race_key": "2026082901020311",
+   "sha256": "57c8c6622268f32ec028f46324c88e5ae5b9b78aa5388833e6127a946bb5c6db"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082901020312/snapshots/t10/7f40815ee8fb3802/manifest.json",
+   "race_key": "2026082901020312",
+   "sha256": "4397cbb397e1fc270000044b7e9b28e949386d442111b2f85451e17e23139c5b"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030303/snapshots/t10/9b501d0502d69a10/manifest.json",
+   "race_key": "2026082904030303",
+   "sha256": "3d1dc93c0711bb184824570eb51ed41b412f14d6e532724d0a6b954f168b5d1d"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030304/snapshots/t10/2e9deba9b096aed7/manifest.json",
+   "race_key": "2026082904030304",
+   "sha256": "5725b4ba1fd49bac527a761bf55de1f24ff39469004ff23840cc505d6acd5fcb"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030306/snapshots/t10/c6f962ef28f3839a/manifest.json",
+   "race_key": "2026082904030306",
+   "sha256": "35989fdda1b2528b7c926101750f54293a23ed485bbac9760657df7117c28a8e"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030307/snapshots/t10/85e4e6a3d2591e81/manifest.json",
+   "race_key": "2026082904030307",
+   "sha256": "346094eb82a5a8af26224be06f537c5be57690e5198c30b0fccdd9f3c6b70283"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030308/snapshots/t10/7d0aecf2fe27c1a9/manifest.json",
+   "race_key": "2026082904030308",
+   "sha256": "c40c19291d4e9ecb24080520e7325f7f1cf541cb18701a178efe0b9e0957dbb6"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030309/snapshots/t10/314ab667197b35e4/manifest.json",
+   "race_key": "2026082904030309",
+   "sha256": "2a0f88fdf62aa47d37fc077919a863cbfb9222781508933003c1bc60a3468c7e"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030310/snapshots/t10/937119a9db43c661/manifest.json",
+   "race_key": "2026082904030310",
+   "sha256": "839b6c3237c490900348c6deb6209a7980b51c504e4067eb8d03b43dc85ecf8b"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082904030311/snapshots/t10/1626c9f735bfcd5c/manifest.json",
+   "race_key": "2026082904030311",
+   "sha256": "ee5920c6cb991d5922a234492dbda82708eea7e7057eedb0fa6c126803226639"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030302/snapshots/t10/75aeaac88749b666/manifest.json",
+   "race_key": "2026082907030302",
+   "sha256": "fb88261af6880a2c809dbf3d89fc280b5283f8498f75b497adc817a0337b1595"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030303/snapshots/t10/002dd6c0c363967d/manifest.json",
+   "race_key": "2026082907030303",
+   "sha256": "29e277b26f8172dc44798fc290953dadd3443223f408d9e2ae4105bacf5ce3a1"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030304/snapshots/t10/6db62979de6875b7/manifest.json",
+   "race_key": "2026082907030304",
+   "sha256": "3174e91626e53c99f386913f68bc55b691d7878373fab41d8b365bf71f8017bb"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030305/snapshots/t10/747cbb36b6b4fdc8/manifest.json",
+   "race_key": "2026082907030305",
+   "sha256": "be45c361bdb047194b0f54a751c4451d22d2013b91225402f2b29eef3458f85a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030306/snapshots/t10/f42472ac8390a94e/manifest.json",
+   "race_key": "2026082907030306",
+   "sha256": "c08129d86eb4990de1bbf8199e64759d21a88b7a84e513ca73d94997c81c4043"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030307/snapshots/t10/0eb831ca851ef2ae/manifest.json",
+   "race_key": "2026082907030307",
+   "sha256": "c23a074dc87705b762940c0e9bedd7038e88429f684e32f3d039907e4c11590b"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030308/snapshots/t10/b61e1d1e2bb0b43e/manifest.json",
+   "race_key": "2026082907030308",
+   "sha256": "0cc08aa07e7085a1f78f91e5fdffb21f223c803bb7ea32c417d77c575d4d30f1"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030309/snapshots/t10/7d1e53050adfb35e/manifest.json",
+   "race_key": "2026082907030309",
+   "sha256": "d2438a628bdd5f9dfc54239847bb8103b3fc0feb3688641267301b8bdb6245c6"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030310/snapshots/t10/8516c9b4b8c24a3d/manifest.json",
+   "race_key": "2026082907030310",
+   "sha256": "ce0878a0f52cb214b404bca9ce9a506c6878aaed1b8373d71073097b27c047b4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030311/snapshots/t10/37a6b6624ec7bb01/manifest.json",
+   "race_key": "2026082907030311",
+   "sha256": "2ddb3623fd0ddc6be9b58a2fe5461c3b413e0fd201c74cbaebc896782744aee4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260829/races/2026082907030312/snapshots/t10/be0dad371db102c2/manifest.json",
+   "race_key": "2026082907030312",
+   "sha256": "4bb08f581f9fd6abecd4fdb7761ffce40b5e807844b62b40549f43e9781252ee"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020401/snapshots/t10/61474adfe1a20ba7/manifest.json",
+   "race_key": "2026083001020401",
+   "sha256": "b950fa2ec0916ad9a05f7b0bb4380cd6eb804754fed5ee2558506aa5a0307b20"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020402/snapshots/t10/dfff75a401b04ac5/manifest.json",
+   "race_key": "2026083001020402",
+   "sha256": "25ec3527f6c2cd3bc2635f4dd2a209b1b31ccb3d6b9c7313d797f7fe41e218d1"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020403/snapshots/t10/32034900251850c2/manifest.json",
+   "race_key": "2026083001020403",
+   "sha256": "06076b49957a6d69692c044162beeb99715e8d8b48e52ad344b0d5833f452ded"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020404/snapshots/t10/998662e0f5316020/manifest.json",
+   "race_key": "2026083001020404",
+   "sha256": "a26df7f14ecbb500ef6899925c7e2d1507aea8edb87fe3efd3e13a2a22849128"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020405/snapshots/t10/cf5de5b97dc9a60f/manifest.json",
+   "race_key": "2026083001020405",
+   "sha256": "8aee8231c0a89c3afe015c52bf0c853bdba0cf682d272c3725b2067054406dd7"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020406/snapshots/t10/1145b1e47ba0c628/manifest.json",
+   "race_key": "2026083001020406",
+   "sha256": "af69af4a5fca5171032c38d06a8aea6ddb3fc1213527b463acf0546f8f2915bb"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020407/snapshots/t10/7eaab573f91a3e4f/manifest.json",
+   "race_key": "2026083001020407",
+   "sha256": "3783a227d5aef26c73c84bcd928cf56fdea695ad50ad394aa62836a5828701b9"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020408/snapshots/t10/cc6e18a3bf0d1549/manifest.json",
+   "race_key": "2026083001020408",
+   "sha256": "433ee026ea282dde08c5d7c625a411be430cf01277d35cd40b7d77a6f0febaac"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020409/snapshots/t10/120e4cb6da3db1df/manifest.json",
+   "race_key": "2026083001020409",
+   "sha256": "7fbc218a0648fb66fb740fec3522ecc416a2205cba808f99a5dd2bdce57895e4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020410/snapshots/t10/913214d989a9c73c/manifest.json",
+   "race_key": "2026083001020410",
+   "sha256": "c2535b04dd79e3ba5cc02662e54a215de43bfd81ae0bd608f521a14d01dfac5f"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020411/snapshots/t10/95e5549f37b6eee3/manifest.json",
+   "race_key": "2026083001020411",
+   "sha256": "4df0816866bf63db96d95c2d033edb2acc8cead380a6e65ddd3492f97673b147"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083001020412/snapshots/t10/0dfbab6992691f54/manifest.json",
+   "race_key": "2026083001020412",
+   "sha256": "6ac6ef7df5c38d0637f3330d2b52474bdb171baf2c8be43fffb93e8e318c8e68"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030402/snapshots/t10/0fea5d8735c490cb/manifest.json",
+   "race_key": "2026083004030402",
+   "sha256": "e59f054ea94628728ee3dc9b4b436bdef9f12634b762caef4d8ca521a11e3011"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030403/snapshots/t10/4d0def0c43b331bc/manifest.json",
+   "race_key": "2026083004030403",
+   "sha256": "3bc3398840845ab795043b4eeb3274c6e7a491c2d701f32bc3ecf101bed8b357"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030404/snapshots/t10/cc7780e576fad0f8/manifest.json",
+   "race_key": "2026083004030404",
+   "sha256": "f11c3389a39f2ec3c10869e7bb6731005a4fe8a69a2aa96b1bbf87ca2f331217"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030405/snapshots/t10/549a6001df00a136/manifest.json",
+   "race_key": "2026083004030405",
+   "sha256": "d9477a4ecb5eae4522ee3cc5f38ce6333b6b23aa38ac58237856fa2894d15889"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030406/snapshots/t10/d089e6a1dba1c7eb/manifest.json",
+   "race_key": "2026083004030406",
+   "sha256": "a3519ea40a17b912438ff1c478b1d8c537d1e2a1e2eae127b5bdd65a3213a35a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030407/snapshots/t10/9528252cd6efb744/manifest.json",
+   "race_key": "2026083004030407",
+   "sha256": "831edcf51d4c891b52adecf6e8c4e721b2e72783b2078af8ec7c94318ba6deb9"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030408/snapshots/t10/6dc87cc1093141b7/manifest.json",
+   "race_key": "2026083004030408",
+   "sha256": "b21ddd71dd0dc09e37f5707edb04a38f49e09026f8283c403fc2f5b7d8f1460e"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030409/snapshots/t10/7444ba191f7b2c4d/manifest.json",
+   "race_key": "2026083004030409",
+   "sha256": "02effa1f02ffb768056057d8cc268c4c596b76414899970b1a01c9aac6a29bf1"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030410/snapshots/t10/50b7b43c137741e8/manifest.json",
+   "race_key": "2026083004030410",
+   "sha256": "6fa9ba7b2ce7e231ad0b830f695fd0d776bbb28f2df5c1f8fd2a230a6c9b68c0"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083004030412/snapshots/t10/2954673d16cf75d2/manifest.json",
+   "race_key": "2026083004030412",
+   "sha256": "a9df53a3a6ddefac4fa325f51fb907688aa8b91c5060ebfa73cd9aa4e922ff28"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030401/snapshots/t10/e01b2a9b0f4660e6/manifest.json",
+   "race_key": "2026083007030401",
+   "sha256": "a53024003c08b0533b66dddd32e841aad7139a530fc6bcb517c2f58703dcc0d4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030402/snapshots/t10/1893caa924cd4fee/manifest.json",
+   "race_key": "2026083007030402",
+   "sha256": "f31df20437083318be157d5e14b77d0945134656d8b83f541787ace97e52b172"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030403/snapshots/t10/e71e0f8d0a1e66cc/manifest.json",
+   "race_key": "2026083007030403",
+   "sha256": "724534aba9d8df51cc1212c2365e66c53c3ab5d5b913e34d50f75efdb3e28c3d"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030404/snapshots/t10/f98d664f7100d05e/manifest.json",
+   "race_key": "2026083007030404",
+   "sha256": "d000168784eaccd50932ca28a4937d7d902393c833ad5354c9cbc781e5380c42"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030405/snapshots/t10/b960eaace8cba999/manifest.json",
+   "race_key": "2026083007030405",
+   "sha256": "95cad1d9611c3022afb49b6ab374e51d6ea56a25bc24b18594ce3d14bb1295e7"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030406/snapshots/t10/58cdfd1559e5c1d4/manifest.json",
+   "race_key": "2026083007030406",
+   "sha256": "0ffb645a9d7423c398de5310d901fd32a9c2b4692f296bb2ca5cdf65f9a44036"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030407/snapshots/t10/72f21dc316514eba/manifest.json",
+   "race_key": "2026083007030407",
+   "sha256": "f4a001ef271080f58e86f3458a344a10e308a80e99dbba89f6da3411f4d1f38d"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030408/snapshots/t10/864204aa7ddcdde5/manifest.json",
+   "race_key": "2026083007030408",
+   "sha256": "6c11f44567c03d362b3cca67c2bf3509a17f90d39c29714d575b1877c7dad5a6"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030409/snapshots/t10/d330ca4694998347/manifest.json",
+   "race_key": "2026083007030409",
+   "sha256": "5cee78b461482982ce7d19f4cd6cdfa6d523d1849ed02745912fe481d55ef6d5"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030410/snapshots/t10/5adb725369767708/manifest.json",
+   "race_key": "2026083007030410",
+   "sha256": "9b0a913cda20d3826ef3cdd955dcfd2e530415e132a474b8a8ad972b0e51ba5b"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030411/snapshots/t10/76468dd49c05f98e/manifest.json",
+   "race_key": "2026083007030411",
+   "sha256": "4b62accb9c1aee4f44440d15ac778f198a03978d6db63821d6ab47f2b5268493"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260830/races/2026083007030412/snapshots/t10/1bd34a7abbcfa1de/manifest.json",
+   "race_key": "2026083007030412",
+   "sha256": "2cb1a69fb202989d883d58e0bb42b95d06700594673fe9cab8f2db2ead2085f3"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020501/snapshots/t10/d685eb7e2b389972/manifest.json",
+   "race_key": "2026090501020501",
+   "sha256": "12ccfc9ae28129fc192f021e2ed97ea0ffd5ca85f31515236371b2865ddfbca7"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020502/snapshots/t10/b14e9b7f534d3fc3/manifest.json",
+   "race_key": "2026090501020502",
+   "sha256": "cc73e6895b47d9b313d8f392ac03678c4288b2a0294dcf6521c591b0c79c4082"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020503/snapshots/t10/fb427982e3b9eda9/manifest.json",
+   "race_key": "2026090501020503",
+   "sha256": "6b6ee9548cbf769f3c50b7723bb5b7504d881408cff97be89464ae096fa00a47"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020504/snapshots/t10/6487bdf3ae89420a/manifest.json",
+   "race_key": "2026090501020504",
+   "sha256": "e58b8a8988de74877d271a5cf0500318c687963a5168ed857698ed6ca1fffa3c"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020505/snapshots/t10/695a5207045af455/manifest.json",
+   "race_key": "2026090501020505",
+   "sha256": "0d6561956fd92d85904a08570d7b799f8bffbb6ec66acb0401e808ffc9f7e23a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020506/snapshots/t10/0e320a7ebbb52017/manifest.json",
+   "race_key": "2026090501020506",
+   "sha256": "eabfc45a9040e485ff886b00299a54cca77173983cc2aa5d2a40d9077bb63f5e"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020507/snapshots/t10/d1572f1b1e6c9d6a/manifest.json",
+   "race_key": "2026090501020507",
+   "sha256": "ee3141017635b33fc0817065c9b8df28e4edf9d0890be6e82a53b47577954b81"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020508/snapshots/t10/37ca0be28e6227a1/manifest.json",
+   "race_key": "2026090501020508",
+   "sha256": "9d7fc17dfecb1eac1a520582701cc0ee49f03bbc95dbdf105c12368df8046cfc"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020509/snapshots/t10/b8e895e3165fe79c/manifest.json",
+   "race_key": "2026090501020509",
+   "sha256": "c6642069ec70bd669e6762241deb256b19e1916e3fcca8a3c76cfc4b9cab3678"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020510/snapshots/t10/bd4bd8eb9be3b187/manifest.json",
+   "race_key": "2026090501020510",
+   "sha256": "3b8d72a6f18fdc9f6f874256e919976f53d0fc63c8846ed2947a161618435988"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020511/snapshots/t10/5f60239e9deeb08c/manifest.json",
+   "race_key": "2026090501020511",
+   "sha256": "4588b863f56736f2d6389aa036f15c36576c4e4751f4f66fd1b40dfe902884ed"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090501020512/snapshots/t10/81b7d59e966d9ec3/manifest.json",
+   "race_key": "2026090501020512",
+   "sha256": "aa97cc096b4dc18e0eeb46d468e0e7ae798cb1d79f868c4b4f457ed47e58a453"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040101/snapshots/t10/b09ab16ccf219db8/manifest.json",
+   "race_key": "2026090506040101",
+   "sha256": "434ba52dbdb8f792e0fad5b09592f4a0dbe7931cdc89267de1842edbeb521eb8"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040102/snapshots/t10/06b51211deddbffc/manifest.json",
+   "race_key": "2026090506040102",
+   "sha256": "d14190b0e7a74c1b24d1f0b09c313f5fddd40b085bb7f073157495834854a2f4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040103/snapshots/t10/560b517f291105d0/manifest.json",
+   "race_key": "2026090506040103",
+   "sha256": "9500029346d5c5d89d22a320d3cea9e26d533a7b3449326a23dc1758e1a32b48"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040104/snapshots/t10/db1007cffacc214a/manifest.json",
+   "race_key": "2026090506040104",
+   "sha256": "e649e9b0f56660540414e7593f3f0ddb18af9ba31af8883198d3eead114649fa"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040105/snapshots/t10/bfe9ac08ecf798d6/manifest.json",
+   "race_key": "2026090506040105",
+   "sha256": "f961ca27fb500ceb7876f03ff87f1e7eea0959c57a33e062b6d1b7ca3d0ce78d"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040106/snapshots/t10/902a59e99bea8ce6/manifest.json",
+   "race_key": "2026090506040106",
+   "sha256": "ffc18df450e7d27497678c13ff3d89da1941ebc729c65c04bccf3e308f03860a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040107/snapshots/t10/406e6573d5fd45ca/manifest.json",
+   "race_key": "2026090506040107",
+   "sha256": "186926304cd73d24127943667eaac1162508cb17ed384f6b197f50205b658a52"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040108/snapshots/t10/c4fcffa1d0b076e7/manifest.json",
+   "race_key": "2026090506040108",
+   "sha256": "ff3f9b5a479d892705c581d5b111a30bd2f14bf71b39737a8cc90efd8de80557"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040109/snapshots/t10/a14b4b6b4252921e/manifest.json",
+   "race_key": "2026090506040109",
+   "sha256": "aaea9379b56cd84a72e220c8daf2ca2d6d2aea27631952f68b6884f51bb9ebd0"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040110/snapshots/t10/14b0d9ea5972861e/manifest.json",
+   "race_key": "2026090506040110",
+   "sha256": "cd2f8c851df2cc2db0855d05d1521b97d790b8d4d19870cd1bb865b5846d32ef"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090506040111/snapshots/t10/0176268faefae104/manifest.json",
+   "race_key": "2026090506040111",
+   "sha256": "f6679d9948e819d6adf9d6fe9f05e460c8f262898726245a11699c8f8a1292e6"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040101/snapshots/t10/f162a9813accade5/manifest.json",
+   "race_key": "2026090509040101",
+   "sha256": "36086e8317b3541fd81cb99e93229eb74c5b5714016ef76bd652fedd3ae03c1a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040102/snapshots/t10/75acdf8d6bb1a18f/manifest.json",
+   "race_key": "2026090509040102",
+   "sha256": "a7392e1329410eae79524a9b5256717d06d72378dc0a3900f62ede55e23b807e"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040103/snapshots/t10/e3b876ceb6a80e7c/manifest.json",
+   "race_key": "2026090509040103",
+   "sha256": "277cc2dd46a9425bce680caca8e1e4426b5ebb07a25ec19bea096851d8a99314"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040105/snapshots/t10/af60f3ccc756f407/manifest.json",
+   "race_key": "2026090509040105",
+   "sha256": "3cd5b1730ac363a4eca39648a8b5c7ec869e12978682cfa92e2eab3e5dd3f20c"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040106/snapshots/t10/8ce4985a149da0d0/manifest.json",
+   "race_key": "2026090509040106",
+   "sha256": "c21bbaae5700e052d04e947b5f333735d938ec488f13fd7d424dbf7169bf28ca"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040107/snapshots/t10/03874f4700a894fe/manifest.json",
+   "race_key": "2026090509040107",
+   "sha256": "a70e8d153a2af2b77887d35cbd0dc1dbc7b55b4ded92701a8c863fa450f78824"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040108/snapshots/t10/aa65b338e415c45a/manifest.json",
+   "race_key": "2026090509040108",
+   "sha256": "259034d36e4e27ca21bca6250b791b074f4a3cf5d54e965fcc40c9bad3f64025"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040109/snapshots/t10/741828d076f7b72a/manifest.json",
+   "race_key": "2026090509040109",
+   "sha256": "9ba0aee2915621b2153527c597eb9d550fd6b9b6154bb7967674933379225700"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040110/snapshots/t10/e26d65cc9ad27bf7/manifest.json",
+   "race_key": "2026090509040110",
+   "sha256": "67abfecc2d0ea7c83f83b8ac9782c2f366bda99c92dc3d351a357a2427be8af0"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040111/snapshots/t10/50fce4816f71e57d/manifest.json",
+   "race_key": "2026090509040111",
+   "sha256": "956b6725b09b79b246dd5ca25cf73e6c8b99291760be29f602a6e7fc02411f34"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260905/races/2026090509040112/snapshots/t10/2ef12ee9a55f6aa2/manifest.json",
+   "race_key": "2026090509040112",
+   "sha256": "1400068814adec377f5cae44dafec1111540d0b8281b1ebd4b641f16704490b2"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020601/snapshots/t10/eecc9cd3d57f9044/manifest.json",
+   "race_key": "2026090601020601",
+   "sha256": "685e3aff0d954e78a88a837a73e167c4733dd8bbb4e28e284119810ec20a1504"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020602/snapshots/t10/980fc4e5fc1bd0db/manifest.json",
+   "race_key": "2026090601020602",
+   "sha256": "3857ab91ae77a0d2ae01f89343694732d8f7e01b0eddb1f64da94cfdf1920c6d"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020603/snapshots/t10/b1e78c1c5f1c065d/manifest.json",
+   "race_key": "2026090601020603",
+   "sha256": "a5680b7be686d9e4052e5a51dbdf02e775afc518ab183bff6168f1b62a6c3756"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020605/snapshots/t10/3a5e19753e378901/manifest.json",
+   "race_key": "2026090601020605",
+   "sha256": "e36b74ec8c4d790ec2238e2394e974cdcab36287510340c5e535bff7279b32a4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020606/snapshots/t10/b8fad95b7bd519e0/manifest.json",
+   "race_key": "2026090601020606",
+   "sha256": "46be5795f90bbf7fe7ae9de4d770986e565c845b405688c949fbd8e04c4b340f"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020607/snapshots/t10/2f55a695a49e0b4d/manifest.json",
+   "race_key": "2026090601020607",
+   "sha256": "f9f24a2c429378fd7cbc85d8404a7793f16aedba75144e83abd5e523bead9fe1"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020608/snapshots/t10/998e48f2610b32fa/manifest.json",
+   "race_key": "2026090601020608",
+   "sha256": "0c16643c585e98f6025e2a252b9055b62476793ee959e6876726dfa1296437d8"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020609/snapshots/t10/01c656c4bb0fe773/manifest.json",
+   "race_key": "2026090601020609",
+   "sha256": "2c9b144b2a86c10e3c0ab4c61b35b2a9400949901a9a67a55143ed98e469df44"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020610/snapshots/t10/ac14ca8fdb3044ba/manifest.json",
+   "race_key": "2026090601020610",
+   "sha256": "b4d5d834d2ff9dab45a996abb00c794536c777b42530a348fcc545742d69e94b"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020611/snapshots/t10/75bef65abcfb22d6/manifest.json",
+   "race_key": "2026090601020611",
+   "sha256": "057482b5123e66803d92fb5b9c4612b96806d60fb103e1f535dc763e7af42df7"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090601020612/snapshots/t10/4a17bee151b956c6/manifest.json",
+   "race_key": "2026090601020612",
+   "sha256": "a06e369c831b66e3922495ef026146dee5097c732e1124f7568f7044ee8b5730"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040201/snapshots/t10/10cd65615a0733c3/manifest.json",
+   "race_key": "2026090606040201",
+   "sha256": "f9bc1fc556a0c497b9f9d7ae7095a0e0b09a922089a1602964ef4e318387a229"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040202/snapshots/t10/ed70d101ec85beb1/manifest.json",
+   "race_key": "2026090606040202",
+   "sha256": "b78f1b4a44005de86982ad6562acb1ab5773abe51b9eadc9e7bc77851534465f"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040203/snapshots/t10/aa915f4e80da7a16/manifest.json",
+   "race_key": "2026090606040203",
+   "sha256": "138a09bb42253ceb699215504ae3bc93835dd779c5279c2d5a716038f5ff7fb3"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040204/snapshots/t10/8e3a99347481275f/manifest.json",
+   "race_key": "2026090606040204",
+   "sha256": "1d2ab9e91ec05446aaabb361cb29678c4b89e92304b3e54198afb8c6bc889d35"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040205/snapshots/t10/2b3127acd4e7bf9c/manifest.json",
+   "race_key": "2026090606040205",
+   "sha256": "07f0d5122a53cc61a0e2d51bcbb0f2bf365da3bc36698d6dc2a5edb33ec2b914"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040206/snapshots/t10/68f41878e3bb74db/manifest.json",
+   "race_key": "2026090606040206",
+   "sha256": "62c5a6c14e86696bb478e49cd9365769e1cb793bf3f547b7173132f562cc65dd"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040207/snapshots/t10/c86593a5c86c77c0/manifest.json",
+   "race_key": "2026090606040207",
+   "sha256": "555d784123468048326831321d9a8cfcbc3f659359fe202674cb0bdd2b12f1fd"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040208/snapshots/t10/81104e6654d179f2/manifest.json",
+   "race_key": "2026090606040208",
+   "sha256": "e257abdec43f838ab544fde30bce4f06e52cf5b1f9f072901f10a378a1b2b1ce"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040209/snapshots/t10/a2d03f022468e4a0/manifest.json",
+   "race_key": "2026090606040209",
+   "sha256": "d9d54fac0c55dc40898ef265d2d576b4d6e63c68d80f36535c8999a779b5ed33"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040210/snapshots/t10/fce316aeea53ae7c/manifest.json",
+   "race_key": "2026090606040210",
+   "sha256": "51a3bd0a2d700c680ec882c83db21652a2694bfebe6d9c479f98316a2886a6e8"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040211/snapshots/t10/0bff0f5bd712b4f3/manifest.json",
+   "race_key": "2026090606040211",
+   "sha256": "589ecb3dbcff41cad1b3e3d3bbb45e91cce6caca873321bca33a3888fcee9ba0"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090606040212/snapshots/t10/74c851d994e96bcf/manifest.json",
+   "race_key": "2026090606040212",
+   "sha256": "3947e6ace4dcb3fbab58990ee9a4e808ce496493fcdfd61af77f51fe1d4a9de7"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040201/snapshots/t10/2ad721b788645331/manifest.json",
+   "race_key": "2026090609040201",
+   "sha256": "c6e655b0eff11731917bc6f90b3aa12850f7d230176ebf4aa66becc85fe17e91"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040202/snapshots/t10/65ade3f53af72662/manifest.json",
+   "race_key": "2026090609040202",
+   "sha256": "02187dfad0ee3e1de0931b8fbff8c3bcf85e2b9a605111fb528fe530429fd77c"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040203/snapshots/t10/14f7ca0f3bd084e0/manifest.json",
+   "race_key": "2026090609040203",
+   "sha256": "28f16ee953a80ce405178aa61cb11fa58d8b90e7a06813186b59a36c67fe01aa"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040204/snapshots/t10/d91023939b06ec59/manifest.json",
+   "race_key": "2026090609040204",
+   "sha256": "fb94fccffa5c2354fb2a35d628df43a9ab3290bc088f09e799d89881bd754a10"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040205/snapshots/t10/92c6805e6af94bd0/manifest.json",
+   "race_key": "2026090609040205",
+   "sha256": "b41d679bdb7edf0ae0ec1033436f219b80a1eedb3a8e5909374a6dc8eabb4336"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040206/snapshots/t10/edb78794f10e3c0d/manifest.json",
+   "race_key": "2026090609040206",
+   "sha256": "52b34978ade0cf8d72f3e250a3e303bc3585fdf25047eed2d62a9d80c0b96144"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040207/snapshots/t10/53680d5c6beadb7a/manifest.json",
+   "race_key": "2026090609040207",
+   "sha256": "5600f6531f60a3a00db523d8c416b3fd947337274bb6dbf1e03f15d228b49e20"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040208/snapshots/t10/7f65a5d30238e20a/manifest.json",
+   "race_key": "2026090609040208",
+   "sha256": "62670b451bb9cca6c18199c776f7451662c73ffb563e82c882179c6bdf767ee7"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040209/snapshots/t10/196c88033b379790/manifest.json",
+   "race_key": "2026090609040209",
+   "sha256": "c437da6d470482cda9afa7edf62857369fdb090eeca1febb814ea8459eb2526f"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040210/snapshots/t10/5c88af6215f84fff/manifest.json",
+   "race_key": "2026090609040210",
+   "sha256": "8e314c97aac2f8c6dad9a8993a301a84f3399f8d8a6d5cc753160a8ee2b805e0"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040211/snapshots/t10/081b7fc01c34581d/manifest.json",
+   "race_key": "2026090609040211",
+   "sha256": "3905e5b82f170289e55b0500fe14eb33b612ccd7b86c6f30bec0780fd19ca7ae"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260906/races/2026090609040212/snapshots/t10/8d18f57cbf0a0f3c/manifest.json",
+   "race_key": "2026090609040212",
+   "sha256": "63007113d6214a556e69751e5f64ba9399efdf1ce330adb26feff914fc1bcc13"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040301/snapshots/t10/7a69f46d00e3016c/manifest.json",
+   "race_key": "2026091206040301",
+   "sha256": "3c96dd8b799be7ae9f388439a197cdd7e65706bc13bbf8d28b18264b0c29a7e3"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040302/snapshots/t10/bfb89090ebd777c6/manifest.json",
+   "race_key": "2026091206040302",
+   "sha256": "88b976c36457d8c9d5b88f53ba7f7deb64b7658c1e10904cd5adf3829088774a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040303/snapshots/t10/3429967e1a88da74/manifest.json",
+   "race_key": "2026091206040303",
+   "sha256": "89232aae6f74fa909916bcc36b4c95b36c5e741bce7d49793d56bd6db837607f"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040304/snapshots/t10/1a981394db5b64bd/manifest.json",
+   "race_key": "2026091206040304",
+   "sha256": "5afae2fbf9a329e3661a0a0607eb81156aa86d8774453b1ad303f2f97dc7e9db"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040305/snapshots/t10/3628d0b2ee20b61f/manifest.json",
+   "race_key": "2026091206040305",
+   "sha256": "450e55f33719d9382f1af5a995e624d8c7260635d8c7a284add413d57439d2a1"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040306/snapshots/t10/89b769743721f4c2/manifest.json",
+   "race_key": "2026091206040306",
+   "sha256": "53d338915c6b2ec291f34d6b688b1c4b51e0f956584e04e3b6d693fbe89b0b34"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040307/snapshots/t10/b3fc81e191d86eca/manifest.json",
+   "race_key": "2026091206040307",
+   "sha256": "d1ccb5195e912835d199ca97c56aa0315288804fc133d12a050043005d416997"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040308/snapshots/t10/4cd26179a445c137/manifest.json",
+   "race_key": "2026091206040308",
+   "sha256": "84b66ce2b1c3fa2ff195b47797115d677d9ac9a37ae2e67eb70c84968001f87c"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040309/snapshots/t10/b11142291e21e7cf/manifest.json",
+   "race_key": "2026091206040309",
+   "sha256": "259d907c5d1c3785f1fb908f7ab77125462c7a6134d0cf77b9a9ae24ab404046"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040310/snapshots/t10/7dd3ed50c642e201/manifest.json",
+   "race_key": "2026091206040310",
+   "sha256": "10e6b4ba1e56a718f875c0d7e1ed1f5abd50b7268aa5e3838a73fc06ea6ea357"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091206040312/snapshots/t10/5d9abb760189c98e/manifest.json",
+   "race_key": "2026091206040312",
+   "sha256": "fe9240008fe818f72ed3dbadf07ebb2c99f5a43b966ebb8fe62edf7670f2c38f"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040301/snapshots/t10/c92f6db603022b4b/manifest.json",
+   "race_key": "2026091209040301",
+   "sha256": "5bd2aaeb2ba76d68ab6f21c5643d3269bbce951d1f97ce1f8bc58f88ed7deb04"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040302/snapshots/t10/0f730f5746b9df8d/manifest.json",
+   "race_key": "2026091209040302",
+   "sha256": "44278fe2272849bb7c80d711b03c3c76af683aeac4c2c9c9bc16001b5274ea0d"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040303/snapshots/t10/7d2ccb1f1261cbfd/manifest.json",
+   "race_key": "2026091209040303",
+   "sha256": "794e858bc03f8ccaf7a3c6c0c86b20f2e34357c63438201f4c5fbe8c707ffd21"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040304/snapshots/t10/a4f8067cf02c03b0/manifest.json",
+   "race_key": "2026091209040304",
+   "sha256": "8a42f3222c788b9637f36189f6e2c51915bb41ba3d3a61466d07fcc0f8a12c12"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040305/snapshots/t10/c883182e479ccc9b/manifest.json",
+   "race_key": "2026091209040305",
+   "sha256": "b297cf9bd0563ea7e070fab511982e2d55a0905cae200e7e7610b760f328fb32"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040306/snapshots/t10/98a80184b8c5d4f3/manifest.json",
+   "race_key": "2026091209040306",
+   "sha256": "e29fa003c570144712ff4ff32ba02a3d513bdf258f6afbb1c5a7a6a6eb8a1aa4"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040307/snapshots/t10/7bd6f61554f0137b/manifest.json",
+   "race_key": "2026091209040307",
+   "sha256": "9f0408c9a8e00c920f7362047284e739b6183d69f73cd2d630a8df62c0f37926"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040308/snapshots/t10/db8ec35bdd300c0c/manifest.json",
+   "race_key": "2026091209040308",
+   "sha256": "8183ad110e329c784e9f92b02ebb51fb42e82899ce192a5e119f49778141970a"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040309/snapshots/t10/7af31a7c307dbbdf/manifest.json",
+   "race_key": "2026091209040309",
+   "sha256": "bc4fc8567b5f0a15d61ec6940ee4d812e36226a1b0a4a5212ed840cbdbcb0269"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040310/snapshots/t10/2a46bd7a8380673e/manifest.json",
+   "race_key": "2026091209040310",
+   "sha256": "4f6fbddee0f0aae70434f5cfba4e3aba97f2e75675d1f7906fd7bcff8952cf85"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040311/snapshots/t10/9b9b5cc9823efa30/manifest.json",
+   "race_key": "2026091209040311",
+   "sha256": "91400ac2203249ddf4a32a352eea2b41d374713e48f04f79c868d79301d5f3a2"
+  },
+  {
+   "manifest": "outputs/experiments/JRA-DAILY-LAB/dates/20260912/races/2026091209040312/snapshots/t10/478299a7710ca480/manifest.json",
+   "race_key": "2026091209040312",
+   "sha256": "70f0c969dbe5d5e86aa29ffffbd7aa354fd77401fed9e5235953e0345de26206"
+  }
+ ]
+}

@@ -47,6 +47,10 @@ jobs:
           brew install gitleaks
           gitleaks detect --no-banner --redact
 
+      - name: Submission package integrity
+        run: |
+          cd submission && shasum -a 256 -c MANIFEST.sha256
+
       - name: Model pipeline end to end
         # No network and no data: the synthetic generator supplies everything.
         run: |

@@ -1,0 +1,82 @@
+{
+ "hits": 4,
+ "implied_final_bank": 5498060,
+ "official_final_bank": 5504260,
+ "races_confirmed": 204,
+ "races_not_confirmed": [
+  {
+   "race_id": "202606040505",
+   "state": "REJECTED"
+  }
+ ],
+ "reconciliation_notes": {
+  "commentary": [
+   "The three day ledgers hold 203 races and 1,224,300 points staked. The daemon snapshots hold 204 and 1,227,300. The difference is one race on 2026-09-13, 202606040404, staking 3,000 points, which the old ledger never recorded. The snapshot is the authoritative side: it carries the armed plan, the payload hash the daemon recomputed, and the CONFIRMED state.",
+   "No settlement was captured locally for 202606040404, so its payout is published as null rather than as zero. The arithmetic bounds it anyway: official final bank minus (opening - stake + payouts) leaves 6,200 points unexplained, of which 5,200 are confirmed refunds on scratched runners. Any payout P on that race would make the residue 6,200 - P, so P is at most 1,000. A winning trifecta on a 3,000-point stake in the bands this policy buys pays orders of magnitude more than 1,000, so the race lost. It is left as null because that is an inference, not a captured settlement.",
+   "1,000 points of the 6,200 remain unattributed. They are not this race's payout, by the bound above. They are recorded here unresolved rather than absorbed into a total."
+  ],
+  "duplicate_race_ids_with_differing_payloads": [],
+  "ledger_rows_with_no_snapshot": [],
+  "races_with_unknown_payout": [
+   "202606040404"
+  ]
+ },
+ "sources": {
+  "ledgers": [
+   {
+    "path": "outputs/competition-2026/ledger.json",
+    "sha256": "2ab583b5786e6e19f2d985d2fa75537cf793c422c5014853485489f838fdc2b5"
+   },
+   {
+    "path": "outputs/competition-2026/sanrentan3-allin-20260919-20/ledger.json",
+    "sha256": "a95e5bd70c38ab15fd87182d6f97c7f1ed5ff6349521c10f9563e8bd089bbd29"
+   },
+   {
+    "path": "outputs/competition-2026/dynamic-20260920/ledger.json",
+    "sha256": "03eac3d657ca09a655321e79ad26b996ca570f47f43b1762d10aef982cda5c8d"
+   }
+  ],
+  "snapshots": [
+   {
+    "path": "outputs/competition-2026/votingd-state/20260829/snapshot.json",
+    "sha256": "6e919e7343fd634049b7dae092e6b25f799ba852b043599f179af20a7424b697"
+   },
+   {
+    "path": "outputs/competition-2026/votingd-state/20260830/snapshot.json",
+    "sha256": "cd8e1c53a6bdf9fc1cda3a15ce435e2604ba4bcc5107a62f5c3b9162cf2a8f2b"
+   },
+   {
+    "path": "outputs/competition-2026/sanrentan3-20260905-06/20260905/snapshot.json",
+    "sha256": "41c4d123debbc77754d20ccfbe16d044ad215750f22d56b025615b474b8eb8db"
+   },
+   {
+    "path": "outputs/competition-2026/sanrentan3-20260905-06/20260906/snapshot.json",
+    "sha256": "59c7d4aa319d8a4f0ae216278ba0c6b369c8eae10bf92f8aca6ed9017e4a5cad"
+   },
+   {
+    "path": "outputs/competition-2026/sanrentan3-20260912-13/20260912/snapshot.json",
+    "sha256": "1d9856196fa4f1ed10486db65aa2785cc87abbe721573bc1a66f64ebe4645c05"
+   },
+   {
+    "path": "outputs/competition-2026/sanrentan3-20260912-13/20260913/snapshot.json",
+    "sha256": "b324dc2b4db6011b90d9f177a9aef8f40f30a2658e03e3cd4535383382517302"
+   },
+   {
+    "path": "outputs/competition-2026/recovery-20260919/snapshot.json",
+    "sha256": "76a04c7ef5d4d9d347580d9895cba11d1d83fd923204156defab58502602aa39"
+   },
+   {
+    "path": "outputs/competition-2026/sanrentan3-allin-20260919-20/20260919/snapshot.json",
+    "sha256": "3cc9fb9307d37f6cef843b3d4344809c6ea4e9466fd79c05df3deee6ed530d14"
+   },
+   {
+    "path": "outputs/competition-2026/dynamic-20260920/snapshot.json",
+    "sha256": "46378293e1f3f1929cba07386b9e77688f9e38d81856edd2d7f3935519d67daa"
+   }
+  ]
+ },
+ "total_payout": 5725360,
+ "total_stake": 1227300,
+ "unexplained_credit": 6200,
+ "window": "2026-08-29..2026-09-21"
+}

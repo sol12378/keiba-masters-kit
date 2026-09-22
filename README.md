@@ -106,6 +106,15 @@ make demo
 | [05-model-pipeline.md](docs/05-model-pipeline.md) | 特徴量、学習、動的計画 |
 | [06-safety.md](docs/06-safety.md) | 計画から送信までの全ゲート |
 
+## 大会で実際に走ったコード
+
+`pykeiba/` は手法を汎用化した再実装です。**大会中に実際に走ったスクリプトそのもの**は
+[submission/](submission/) にあります。運営提出物であり、凍結された記録です。
+
+- フェーズ1（190レース）の方策表と意思決定の全経路
+- フェーズ2（14レース）の学習コードと確定係数、および**それが再現することの検査**
+- 実際に投票した204レースの買い目を含む台帳と、未解決の1,000ptを含む残高照合
+
 そのほか [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md)、
 [DISCLAIMER.md](DISCLAIMER.md)。
 

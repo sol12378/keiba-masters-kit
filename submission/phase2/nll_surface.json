@@ -1,0 +1,52 @@
+{
+ "bounds": {
+  "c0": [
+   0.5,
+   1.5
+  ],
+  "c1": [
+   0.0,
+   0.5
+  ]
+ },
+ "counts": {
+  "combinations_per_race": {
+   "max": 4896,
+   "min": 60
+  },
+  "holdout_races": 46,
+  "training_races": 155
+ },
+ "exact_reference": {
+  "coefficients": [
+   0.9265476143601139,
+   0.0
+  ],
+  "market_holdout_nll": 5.8987667347614785,
+  "model_holdout_nll": 5.895716383288191,
+  "training_nll_at_fit": 6.171430627658593
+ },
+ "grid": {
+  "c0_step": 0.0020000000000000018,
+  "c0_steps": 501,
+  "c1_step": 0.005,
+  "c1_steps": 101
+ },
+ "holdout_dates": [
+  "20260913",
+  "20260919"
+ ],
+ "note": "Objective values only. A grid of means over races carries no per-combination price and cannot be inverted into the odds behind it.",
+ "objective": "mean per-race conditional NLL of the winning trifecta combination; features are [log market probability, log Harville probability]",
+ "ridge": {
+  "centre": [
+   1.0,
+   0.0
+  ],
+  "lambda": 0.1
+ },
+ "schema": "keiba-masters-kit.nll_surface.v1",
+ "surface_file": "nll_surface.npz",
+ "surface_sha256": "32c26a2f6bbe564d0386eb41c1ba91f2e7240aa21b21690056839ce37273d1e9",
+ "training_last_date": "20260912"
+}

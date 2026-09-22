@@ -1,0 +1,58 @@
+{
+ "2026-08-29": {
+  "hits": 1,
+  "payout": 641300,
+  "payout_unknown": 0,
+  "races": 29,
+  "stake": 84700
+ },
+ "2026-08-30": {
+  "hits": 0,
+  "payout": 0,
+  "payout_unknown": 0,
+  "races": 33,
+  "stake": 141000
+ },
+ "2026-09-05": {
+  "hits": 0,
+  "payout": 0,
+  "payout_unknown": 0,
+  "races": 36,
+  "stake": 108000
+ },
+ "2026-09-06": {
+  "hits": 0,
+  "payout": 0,
+  "payout_unknown": 0,
+  "races": 35,
+  "stake": 105000
+ },
+ "2026-09-12": {
+  "hits": 0,
+  "payout": 0,
+  "payout_unknown": 0,
+  "races": 23,
+  "stake": 69000
+ },
+ "2026-09-13": {
+  "hits": 0,
+  "payout": 0,
+  "payout_unknown": 1,
+  "races": 24,
+  "stake": 72000
+ },
+ "2026-09-19": {
+  "hits": 1,
+  "payout": 404900,
+  "payout_unknown": 0,
+  "races": 10,
+  "stake": 204200
+ },
+ "2026-09-20": {
+  "hits": 2,
+  "payout": 4679160,
+  "payout_unknown": 0,
+  "races": 14,
+  "stake": 443400
+ }
+}
