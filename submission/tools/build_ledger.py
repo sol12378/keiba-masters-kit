@@ -53,6 +53,22 @@ LEDGERS = [
 #: The balance the service itself reported at the close of the window.
 OFFICIAL_FINAL_BANK = 5_504_260
 
+#: What actually chose the bet in each policy.  ``policy_table_lookup`` means
+#: build_vote_plan.lookup() was called with (races remaining, bank); the others
+#: carry their price band and ticket count as constants.
+DECISION_MECHANISM = {
+    "COMPETITION-2026-V17": "policy_table_lookup",
+    "COMPETITION-2026-V18-TAIL133": "fixed_band_with_target_backsolve",
+    "COMPETITION-2026-V20-SANRENTAN3-1000": "fixed_band_fixed_stake",
+    "COMPETITION-2026-V20-SANRENTAN3-1000-20260905": "fixed_band_fixed_stake",
+    "COMPETITION-2026-V20-SANRENTAN3-1000-20260906": "fixed_band_fixed_stake",
+    "COMPETITION-2026-V20-SANRENTAN3-1000-20260912": "fixed_band_fixed_stake",
+    "COMPETITION-2026-V20-SANRENTAN3-1000-20260913": "fixed_band_fixed_stake",
+    "COMPETITION-2026-ALLIN-SANRENTAN-20260919": "band_filter_with_class_allocation",
+    "COMPETITION-2026-ALLIN-RECOVERY-20260919-N12": "band_filter_with_class_allocation",
+    "COMPETITION-2026-DYNAMIC-20260920": "target_backsolve_with_knapsack_and_fitted_model",
+}
+
 RECONCILIATION_COMMENTARY = [
     "The three day ledgers hold 203 races and 1,224,300 points staked. The "
     "daemon snapshots hold 204 and 1,227,300. The difference is one race on "
@@ -174,6 +190,23 @@ def main() -> None:
             if entry["payout"] > 0:
                 day["hits"] += 1
 
+    # Which policy actually decided each race.  Worth having in the data
+    # rather than only in prose: only the first day's races were decided by a
+    # state-dependent lookup into the policy table.  The rest ran on fixed
+    # rules, one of which was frozen from a table output and then applied
+    # unchanged to every eligible race.
+    by_policy: dict[str, dict] = {}
+    for entry in confirmed:
+        row = by_policy.setdefault(entry["policy_id"], {
+            "races": 0, "stake": 0, "payout": 0, "dates": set(),
+        })
+        row["races"] += 1
+        row["stake"] += entry["stake"]
+        row["payout"] += entry["payout"] or 0
+        row["dates"].add(entry["race_date"])
+    for row in by_policy.values():
+        row["dates"] = sorted(row["dates"])
+
     total_stake = sum(e["stake"] for e in confirmed)
     total_payout = sum(e["payout"] or 0 for e in confirmed)
     summary = {
@@ -189,6 +222,8 @@ def main() -> None:
         "total_payout": total_payout,
         "hits": sum(1 for e in confirmed if (e["payout"] or 0) > 0),
         "implied_final_bank": 1_000_000 - total_stake + total_payout,
+        "by_policy": by_policy,
+        "decision_mechanism": DECISION_MECHANISM,
         "official_final_bank": OFFICIAL_FINAL_BANK,
         "unexplained_credit": OFFICIAL_FINAL_BANK - (1_000_000 - total_stake + total_payout),
         "reconciliation_notes": {

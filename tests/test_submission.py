@@ -106,3 +106,22 @@ def test_no_absolute_home_path_leaks_into_the_submission():
             continue
         text = path.read_text(encoding="utf-8", errors="ignore")
         assert "/Users/" not in text, f"{path} still carries an absolute home path"
+
+
+def test_the_policy_breakdown_matches_the_races(ledger, races):
+    """The README claims a specific split of decision mechanisms. Check it."""
+    confirmed = [r for r in races if r["state"] == "CONFIRMED"]
+    by_policy = {}
+    for race in confirmed:
+        by_policy[race["policy_id"]] = by_policy.get(race["policy_id"], 0) + 1
+    assert {k: v["races"] for k, v in ledger["by_policy"].items()} == by_policy
+
+    mechanism = ledger["decision_mechanism"]
+    assert set(mechanism) >= set(by_policy), "a policy has no recorded mechanism"
+
+    table_driven = sum(count for policy, count in by_policy.items()
+                       if mechanism[policy] == "policy_table_lookup")
+    fitted_model = sum(count for policy, count in by_policy.items()
+                       if "fitted_model" in mechanism[policy])
+    assert table_driven == 29, "only the first day consulted the policy table"
+    assert fitted_model == 14, "only 2026-09-20 read a fitted model"

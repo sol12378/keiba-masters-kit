@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "policy_id": "COMPETITION-2026-V20-SANRENTAN3-1000",
+  "status": "USER_OVERRIDDEN_ALL_RACE_POLICY",
+  "active_date": "2026-08-30",
+  "effective_not_before": "2026-08-30T12:34:30+09:00",
+  "bet_type": "sanrentan",
+  "target_odds": 936.5,
+  "tickets": 3,
+  "stake_each_points": 1000,
+  "race_spend_points": 3000,
+  "model_weight": 0.05,
+  "source_policy_id": "COMPETITION-2026-V17",
+  "source_evidence_plan": "outputs/competition-2026/plans/2026082901020306.json",
+  "bet_every_eligible_race": true,
+  "stop_after_qualification": false
+}

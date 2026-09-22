@@ -1,4 +1,98 @@
 {
+ "by_policy": {
+  "COMPETITION-2026-ALLIN-RECOVERY-20260919-N12": {
+   "dates": [
+    "2026-09-19"
+   ],
+   "payout": 0,
+   "races": 1,
+   "stake": 22200
+  },
+  "COMPETITION-2026-ALLIN-SANRENTAN-20260919": {
+   "dates": [
+    "2026-09-19"
+   ],
+   "payout": 404900,
+   "races": 9,
+   "stake": 182000
+  },
+  "COMPETITION-2026-DYNAMIC-20260920": {
+   "dates": [
+    "2026-09-20"
+   ],
+   "payout": 4679160,
+   "races": 14,
+   "stake": 443400
+  },
+  "COMPETITION-2026-V17": {
+   "dates": [
+    "2026-08-29"
+   ],
+   "payout": 641300,
+   "races": 29,
+   "stake": 84700
+  },
+  "COMPETITION-2026-V18-TAIL133": {
+   "dates": [
+    "2026-08-30"
+   ],
+   "payout": 0,
+   "races": 12,
+   "stake": 78000
+  },
+  "COMPETITION-2026-V20-SANRENTAN3-1000": {
+   "dates": [
+    "2026-08-30"
+   ],
+   "payout": 0,
+   "races": 21,
+   "stake": 63000
+  },
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260905": {
+   "dates": [
+    "2026-09-05"
+   ],
+   "payout": 0,
+   "races": 36,
+   "stake": 108000
+  },
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260906": {
+   "dates": [
+    "2026-09-06"
+   ],
+   "payout": 0,
+   "races": 35,
+   "stake": 105000
+  },
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260912": {
+   "dates": [
+    "2026-09-12"
+   ],
+   "payout": 0,
+   "races": 23,
+   "stake": 69000
+  },
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260913": {
+   "dates": [
+    "2026-09-13"
+   ],
+   "payout": 0,
+   "races": 24,
+   "stake": 72000
+  }
+ },
+ "decision_mechanism": {
+  "COMPETITION-2026-ALLIN-RECOVERY-20260919-N12": "band_filter_with_class_allocation",
+  "COMPETITION-2026-ALLIN-SANRENTAN-20260919": "band_filter_with_class_allocation",
+  "COMPETITION-2026-DYNAMIC-20260920": "target_backsolve_with_knapsack_and_fitted_model",
+  "COMPETITION-2026-V17": "policy_table_lookup",
+  "COMPETITION-2026-V18-TAIL133": "fixed_band_with_target_backsolve",
+  "COMPETITION-2026-V20-SANRENTAN3-1000": "fixed_band_fixed_stake",
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260905": "fixed_band_fixed_stake",
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260906": "fixed_band_fixed_stake",
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260912": "fixed_band_fixed_stake",
+  "COMPETITION-2026-V20-SANRENTAN3-1000-20260913": "fixed_band_fixed_stake"
+ },
  "hits": 4,
  "implied_final_bank": 5498060,
  "official_final_bank": 5504260,

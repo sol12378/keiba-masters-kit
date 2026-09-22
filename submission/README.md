@@ -6,15 +6,46 @@
 `pykeiba/` とは役割が違います。あちらは今後も直していく汎用ライブラリで、こちらは
 「あの日これが動いた」という記録です。**import しないでください。** 保守しません。
 
-## 2つのフェーズ
+## 何が各レースを決めたのか
 
-意思決定は時系列で明確に2つに分かれます。後から学習したモデルを過去の投票に遡って
-使ったようには書きません。
+意思決定は時系列で2つのフェーズに分かれますが、**フェーズ1の190レースが同じ機構で
+動いていたわけではありません。** 方策表を状態依存に引いたのは初日の29レースだけで、
+残りは固定の価格帯と点数で走りました。数字で示します。
 
-| | 期間 | レース数 | 方式 |
-|---|---|---:|---|
-| **フェーズ1** | 8/29〜9/19 | 190 | 決定論的な方策表。**学習済み係数を読み込んでいない** |
-| **フェーズ2** | 9/20 | 14 | 目標到達確率の最適化＋2係数の学習モデル（混合5%） |
+| 期間 | R | policy_id | 何が券種・価格帯・金額を決めたか | スクリプト |
+|---|---:|---|---|---|
+| 8/29 | 29 | `V17` | **方策表を引く** `lookup(残りレース数, 所持pt)` | `phase1/build_vote_plan.py` |
+| 8/30 | 12 | `V18-TAIL133` | 固定帯（馬単133倍×1点）＋目標残高からの逆算 | `phase1/build_vote_plan.py`（tail policy経由） |
+| 8/30, 9/5–9/13 | 139 | `V20-SANRENTAN3-1000` | **完全固定**（三連単936.5倍×3点×1,000pt、全レース） | `phase1/sanrentan3_plan.py` |
+| 9/19 | 10 | `ALLIN-*` | 375〜8000倍のフィルタ＋クラス別配分 | `phase1/allin_plan.py`, `phase1/recover_allin.py` |
+| 9/20 | 14 | `DYNAMIC-20260920` | 目標逆算＋**学習済みモデル5%混合**＋ナップサック | `phase2/optimizer.py` |
+
+機構ごとの内訳は `ledger/summary.json` の `by_policy` と `decision_mechanism` に
+機械可読な形で入っています。
+
+### 方策表は何に使われたのか
+
+**29レースで直接、139レースで間接的に**です。V20の方策
+（`phase1/sanrentan3_policy.json`）は自分の出自を記録しています。
+
+```json
+"source_policy_id": "COMPETITION-2026-V17",
+"source_evidence_plan": "outputs/competition-2026/plans/2026082901020306.json",
+"status": "USER_OVERRIDDEN_ALL_RACE_POLICY"
+```
+
+つまり、方策表がある状態で出した行動（三連単936.5倍×3点×1,000pt）を凍結し、以後は
+状態を見ずに全レースへ適用した、というのが実際に起きたことです。**「31,944行の表を
+毎レース引いて状態依存に行動を変えていた」とは言えません。**
+
+すべてのフェーズで共通しているのは、帯の中でどの組合せを買うかの決め方です
+（`build_vote_plan.py:290` `pick`、価格順位95%＋Harville確率順位5%）。V20もこれを
+呼んでいます。
+
+### 学習済み係数を読み込んだのは14レースだけ
+
+フェーズ1のどのスクリプトも学習済みの係数ファイルを読みません。`model.json` を
+読むのは `phase2/optimizer.py` だけで、対象は9/20の14レースです。
 
 ## 運営要求への対応表
 
@@ -22,12 +53,14 @@
 |---|---|
 | 意思決定の全経路（オッズ入力→送信金額） | `phase1/build_vote_plan.py:332` `build_plan` |
 | 方策表の引き方 | `phase1/build_vote_plan.py:235` `lookup` |
-| 方策表そのもの（31,944行） | `phase1/policy_table_v17.json` |
+| 方策表そのもの（31,944行） | `phase1/policy_table_v17.json`（実際に引いたのは8/29の29レース） |
 | 市場確率の作り方 | `phase1/build_vote_plan.py:255` `win_probabilities` |
 | Harville順序確率 | `phase1/build_vote_plan.py:265` `order_probability` |
 | 帯の中でどの組合せを買うか | `phase1/build_vote_plan.py:290` `pick`（価格順位95%＋確率順位5%） |
 | 印の決め方 | `phase1/build_vote_plan.py:320` `marks_from_market` |
 | 投票額の下限スケジュール | `phase1/build_vote_plan.py:223` `current_floor` |
+| 139レースを動かした固定方策 | `phase1/sanrentan3_plan.py` と `phase1/sanrentan3_policy.json` |
+| 9/19の帯フィルタと配分 | `phase1/allin_plan.py:77` ほか |
 | 9/20の学習コード | `phase2/optimizer.py:172` `train` |
 | 学習済み係数と検証結果 | `phase2/model.json` |
 | 係数が再現することの確認 | `phase2/reproduce.py` を実行 |
