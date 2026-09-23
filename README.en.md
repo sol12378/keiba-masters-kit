@@ -58,9 +58,9 @@ No race data is included. Odds and results belong to their providers and cannot 
 
 ## The code that actually ran
 
-`pykeiba/` is a generalised rewrite of the method. The scripts that actually ran during the contest are in [submission/](submission/), kept as they were: the policies and planners for 190 races from 29 August to 19 September (of which the 29 races on 29 August consulted the policy table directly), the learning code and fitted weights for the 14 races on 20 September together with a check that those weights reproduce, and a ledger of all 204 races including every ticket bought.
+`pykeiba/` is a generalised rewrite of the method I used. The scripts I actually ran during the contest are in [submission/](submission/), kept as they were: the policies and planners for 190 races from 29 August to 19 September (of which the 29 races on 29 August consulted the policy table directly), the learning code and fitted weights for the 14 races on 20 September together with a check that those weights reproduce, and a ledger of all 204 races including every ticket bought.
 
-Publication was confirmed with the contest organiser after the contest ended.
+I confirmed publication with the contest organiser after the contest ended.
 
 ## Documentation (Japanese)
 
@@ -76,7 +76,11 @@ Publication was confirmed with the contest organiser after the contest ended.
 
 ## Acknowledgements
 
-With thanks to everyone who organised and ran AI 競馬予想マスターズ 2026, and for agreeing to the publication of this repository. I hope it is useful to anyone taking part in future contests.
+My thanks to everyone who organised and ran AI 競馬予想マスターズ 2026, and for agreeing to the publication of this repository. I hope it is useful to anyone taking part in future contests.
+
+## Author
+
+Ryuichi Sato ([@sol12378](https://github.com/sol12378))
 
 ## Licence
 
