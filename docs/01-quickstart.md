@@ -1,6 +1,6 @@
 # クイックスタート
 
-cloneから紙投票の送信まで。所要10分程度で、そのほとんどはスケジューラ待ちです。
+リポジトリの取得から、模擬投票で実際に送信されるところまでを順に説明します。所要時間は10分ほどで、そのほとんどは発走時刻を待つ時間です。
 
 ## 1. 導入
 
@@ -10,8 +10,7 @@ cd keiba-masters-kit
 make setup
 ```
 
-`make setup` は `.venv` を作り、Pythonパッケージをeditableで入れ、`bin/votingd` と
-`bin/votectl` をビルドします。
+`make setup` は、Python の仮想環境 `.venv` を作ってパッケージを入れ、`bin/votingd`（投票デーモン）と `bin/votectl`（操作用コマンド）をビルドします。
 
 ## 2. データなしでモデルを作る
 
@@ -19,63 +18,54 @@ make setup
 make model
 ```
 
-5つの段階が順に走ります。
+次の5つの処理が順に実行されます。
 
-| 段階 | 内容 | 典型的な出力 |
+| 処理 | 内容 | 出力の目安 |
 |---|---|---|
-| `synth` | `data/synthetic` に合成シーズンを書き出す | 72レース、3連単の建値 約60,000通り |
-| `train` | 前半の日付で2つの係数を推定 | `[0.935, 0.0]`、holdout NLL改善 約0.015 |
-| `policy-table` | `(残りレース数, 所持pt) → 行動` を解く | 約27,000状態を1秒未満で |
-| `verify` | 方策表を20,000回前向きに回す | 到達率 約0.41、最終残高の平均 約810,000 |
-| `backtest` | パネルを方策表で再生 | 1経路あたり的中は多くて1〜2回 |
+| `synth` | `data/synthetic` に合成データを書き出す | 72レース、三連単のオッズ約60,000通り |
+| `train` | 前半の日付で2つの重みを推定する | 重み `[0.935, 0.0]`、holdout NLL の改善 約0.015 |
+| `policy-table` | 「残りレース数・所持ポイント → 行動」の表を計算する | 約27,000状態を1秒未満で |
+| `verify` | できた表で20,000回シミュレーションする | 到達率 約0.41、最終残高の平均 約810,000 |
+| `backtest` | 合成データのレースを表に従って再生する | 的中は1回の再生で多くて1〜2回 |
 
-何より先に見るべき数字が2つあります。
+最初に確認していただきたい数字が2つあります。
 
-`upper_bound_on_reach` は `R_max × 初期資金 / 目標` です。資金が回収率の範囲でしか
-保存されない以上、どんな方策もこれを超えられません。`value_at_initial_bank` はこれを
-下回っていなければなりません。下回らない場合、ソルバは表を返さずに例外を投げます。
-上界を超える値は、戦略ではなく**動的計画が自分の離散化から資金を作っている**ことを
-意味するからです。
+1つ目は `upper_bound_on_reach` です。これは `最大払戻率 × 初期資金 ÷ 目標` で、どのような賭け方をしてもこの確率を超えて目標に届くことはありません。計算結果の `value_at_initial_bank` は必ずこれを下回ります。もし上回った場合、それは有効な戦略ではなく計算の誤りなので、プログラムは表を出力せずに停止します。
 
-`mean_final_bank` は初期資金を下回ります。常にそうなります。このパイプラインのどこにも
-エッジは存在しないからです。
+2つ目は `mean_final_bank`（最終残高の平均）です。初期資金の1,000,000を下回ります。この手法には市場を上回る優位性がないため、平均すると必ず損をします。
 
-## 3. 全経路をローカルで回す
+## 3. 投票の流れをローカルで再現する
 
 ```bash
 make demo
 ```
 
-デモがやること。
+デモは次の順に進みます。
 
-1. 当日の状態ディレクトリを `var/` 以下でクリアする
-2. ある1日のレースを10分後の発走に付け替える
-3. その日付のポリシーを生成し、計画バンドルを作る
-4. 紙投票ドライバで `votingd` を起動する
-5. バンドルのSHA-256を明示して、その日をimport・武装する
-6. デーモンを起動したまま残すので、動作を観察できる
+1. `var/` 以下にある当日分の状態を消去する
+2. ある1日のレースの発走時刻を、10分後から始まるように付け替える
+3. その日付用のポリシーファイルを作り、計画ファイルを作る
+4. 模擬投票ドライバで `votingd` を起動する
+5. 計画を取り込み、ハッシュ値を入力してその日の送信を許可する
+6. デーモンを動かしたままにして、送信の様子を観察できるようにする
 
-別のシェルで:
+別のターミナルで、次のように様子を確認できます。
 
 ```bash
-./bin/votectl --policy var/policy_<date>.json status
-cat var/voting-<date>/paper_state.json
-tail -f var/voting-<date>/events.jsonl
+./bin/votectl --policy var/policy_<日付>.json status
+cat var/voting-<日付>/paper_state.json
+tail -f var/voting-<日付>/events.jsonl
 ```
 
-各レースは `DISCOVERED → VALIDATED → ARMED → POSTING → PENDING_CONFIRMATION →
-CONFIRMED` と遷移します。送信は発走300秒前、読み返しによる確認はその約1分後です。
+各レースの状態は `DISCOVERED → VALIDATED → ARMED → POSTING → PENDING_CONFIRMATION → CONFIRMED` と進みます。送信は発走の300秒前に行われ、その約1分後に大会側（ここでは模擬）の記録を読み返して照合します。
 
-`paper_state.json` は紙投票ドライバの台帳です。受け付けた投票と、1,000,000から始まる
-模擬残高が入っています。残高は計画が賭けた額だけ正確に減るので、**送信された内容が
-プランナーの決定と一致しているか**を最も手早く確認できる場所です。
+`paper_state.json` は模擬投票の台帳です。受け付けた投票と、1,000,000から始まる模擬の残高が記録されています。残高は計画どおりの金額だけ減るので、送信内容が計画と一致しているかを手早く確認できます。
 
-Ctrl-Cでデモを止めます。
+止めるときは Ctrl-C を押してください。
 
-## 4. 自分のデータを使う
+## 4. ご自身のデータを使う
 
-パイプラインはレースごとのJSONファイルが並んだディレクトリを読みます。同じ形を出力する
-収集スクリプトを自分で書けば、そのまま使えます。
+パイプラインは、1レースにつき1つのJSONファイルが並んだディレクトリを読み込みます。同じ形式のファイルを出力するように収集の仕組みを用意すれば、そのまま使えます。
 
 ```bash
 .venv/bin/python -m pykeiba train    --panel /path/to/panel --out out/model.json
@@ -83,17 +73,15 @@ Ctrl-Cでデモを止めます。
     --table out/policy_table.json
 ```
 
-形式と、`captured_at` について守らなければならないことは
-[04-data-contract.md](04-data-contract.md) にあります。
+データ形式と、とくに `captured_at`（オッズを取得した時刻）について守る必要があることは、[04-data-contract.md](04-data-contract.md) にまとめています。
 
-## 5. launchdの下で動かす
+## 5. launchd で常駐させる
 
 ```bash
-./scripts/launchd.sh install --policy var/policy_<date>.json --driver paper
+./scripts/launchd.sh install --policy var/policy_<日付>.json --driver paper
 ./scripts/launchd.sh status
 ./scripts/launchd.sh logs
 ./scripts/launchd.sh uninstall
 ```
 
-[03-launchd.md](03-launchd.md) を参照してください。特にスリープの項は読んでおいて
-ください。
+詳しくは [03-launchd.md](03-launchd.md) をご覧ください。Mac がスリープすると投票できなくなる点について書いた節は、常駐させる前にぜひお読みください。

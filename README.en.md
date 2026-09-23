@@ -1,58 +1,40 @@
 # keiba-masters-kit
 
-A local betting runtime and the model pipeline that feeds it, extracted from an
-entry to the AI 競馬予想マスターズ 2026 contest.
+A local voting runtime and the model pipeline that feeds it, taken from one participant's entry to the AI 競馬予想マスターズ 2026 contest.
 
-Everything here operates on the contest's **virtual points**. Nothing in this
-repository buys a real betting ticket.
+> **Please note**
+>
+> - This is an **unofficial** release by an individual participant. It is not affiliated with, or endorsed by, the contest organiser.
+> - Everything here works in the contest's virtual points. Nothing in this repository buys a real betting ticket.
+> - In Japan, betting on horse racing is limited to people aged 20 and over. Please read [DISCLAIMER.md](DISCLAIMER.md) (Japanese) before using it.
 
-日本語版 (primary): [README.md](README.md)
+日本語（主）: [README.md](README.md)
 
-**The documentation under `docs/` is written in Japanese**, for the audience
-this was built for. This file is a summary; the Japanese documents are the
-detailed ones. Source comments are in English.
+The detailed documentation under `docs/` is written in Japanese, for the audience this was built for. This file is a summary. Source code comments are in English.
 
-## What this is
+## What it is
 
-Two halves that meet at a signed JSON file.
+Two parts, joined by a plan file that carries a SHA-256 of its own content.
 
-**The runtime** (Go) takes a frozen plan for a day's races and submits it: one
-submission per race, at a fixed number of seconds before post time, then a
-read-back to confirm what the other side actually recorded. It keeps an
-append-only journal, survives being killed mid-submission, and runs under
-launchd so a crash inside a submission window does not cost the race.
+**The voting runtime (Go)** takes a frozen plan for a day's races and submits it: one submission per race at a fixed time before post, followed by a read-back that compares what the contest server recorded against what was sent. It keeps an append-only journal, recovers safely if it is killed mid-submission, and runs under launchd.
 
-**The model pipeline** (Python) turns quoted odds into that plan: market
-probabilities with the overround removed, Harville ordered probabilities from
-the win pool, a two-coefficient log-linear blend of the two, and a dynamic
-program over `(races remaining, bank)` that decides what price to buy and how
-much to stake.
+**The model pipeline (Python)** turns decision-time odds into that plan: overround-free market probabilities, Harville ordered probabilities from the win pool, a two-weight log-linear blend of the two, and a dynamic program over `(races remaining, points held)` that decides which price band to buy and how much to stake.
 
-The two halves hash the plan independently and a test pins them together, so a
-serialization change fails in CI rather than on a race day.
+Go and Python compute the plan hash independently, and a test pins them together, so a serialisation change fails during development rather than on a race day.
 
-## What this is not
+## Limits
 
-It is **not a way to beat the market**. The model has two market-derived
-features and the shipped blend gives it 5% of the weight. On the synthetic data
-in this repository it improves holdout NLL by about 0.015 nats out of 5.8 —
-which is to say, barely. The dynamic program assumes *no edge at all*: every
-price band pays back less than it takes, and the program only chooses when to
-accept variance in exchange for a chance at a target. Its own reported value is
-checked against `P(reach) ≤ R_max × initial / goal`, and the solver refuses to
-return a table that claims more.
+It is not a way to beat the market.
 
-Run `make model` and look at `mean_final_bank` in the verification output. It is
-below the starting bank, every time. That is the honest shape of this problem.
+- The model has two market-derived inputs and, by default, contributes 5% of the final probability. On the bundled synthetic data it improves holdout NLL by about 0.015 out of 5.8.
+- The dynamic program assumes every price band returns less than it takes. It chooses when to accept risk, not how to raise expected value.
+- Its result is checked against `P(reach) ≤ R_max × initial / goal`; the solver refuses to return a table that exceeds this bound.
+
+`make model` prints the mean and median final points. The mean is below the starting amount and, with the default settings, the median is close to zero.
 
 ## Requirements
 
-macOS (Apple silicon or Intel), Go 1.26+, Python 3.11+, and
-[uv](https://github.com/astral-sh/uv).
-
-macOS is the only supported platform. The Go and Python parts are portable, but
-the scheduling layer is launchd and there are no systemd or Windows equivalents
-here.
+macOS (Apple silicon or Intel), Go 1.26+, Python 3.11+, and [uv](https://github.com/astral-sh/uv). The scheduling layer is launchd; there are no systemd or Windows equivalents.
 
 ## Quick start
 
@@ -62,57 +44,40 @@ make model
 make demo
 ```
 
-`make model` needs no data and no network: it generates a synthetic season,
-fits the model on the earlier dates, solves the policy table, verifies it by
-forward simulation, and backtests it.
-
-`make demo` runs the whole thing end to end — it moves a day's races to start a
-few minutes from now, builds a plan bundle, starts `votingd` on the **paper
-driver**, arms the day, and lets the daemon submit and reconcile each race on
-schedule. No account, no network, no credentials.
+`make model` needs no data and no network. `make demo` runs the whole loop locally on the **paper driver** — plan, approve, submit on schedule, reconcile — with no account and no credentials.
 
 ## Submitting to the real contest
 
-The live driver (`--driver live`) submits to the official contest endpoint with
-your own contest account, read from `KEIBA_LOGIN_ID` and `KEIBA_PASSWORD`.
+The live driver (`--driver live`) submits to the contest's voting API using your own account from `KEIBA_LOGIN_ID` and `KEIBA_PASSWORD`. It only works while the contest is accepting votes. The 2026 contest ended on 22 September 2026, so there is nothing for it to submit to today; the paper driver is the default for that reason.
 
-**It only works while the contest is accepting votes.** The 2026 contest closed
-on 22 September 2026; outside a contest window the endpoint rejects every
-submission, so `--driver live` has nothing to talk to. The paper driver is what
-makes the rest of the repository useful after that date, and it is the default
-for exactly that reason.
-
-The runtime will not submit anything unless, all at once: the policy enables
-submission, the policy's date matches the plan's date, a date-scoped
-environment variable matches the policy, an operator arms the day against the
-bundle's exact SHA-256, and no kill-switch file is present. That is five
-deliberate steps, and it is not accidental — see [docs/06-safety.md](docs/06-safety.md).
+A submission needs five separate, deliberate steps, plus the absence of an emergency-stop file. See `docs/06-safety.md`.
 
 ## Data
 
-**This repository ships no race data.** Historical odds and results come with
-third-party terms this project cannot pass on, and the captures behind the
-original work run to tens of gigabytes.
+No race data is included. Odds and results belong to their providers and cannot be redistributed from here. What ships instead is the data format (`docs/04-data-contract.md`) and a generator that produces synthetic data in the same shape.
 
-What it ships instead is the schema
-([docs/04-data-contract.md](docs/04-data-contract.md)) and a generator that
-produces the same shape with known ground truth. Point the pipeline at your own
-panel and everything works the same way.
+## The code that actually ran
 
-## Documentation
+`pykeiba/` is a generalised rewrite of the method. The scripts that actually ran during the contest are in [submission/](submission/), kept as they were: the policies and planners for 190 races from 29 August to 19 September (of which the 29 races on 29 August consulted the policy table directly), the learning code and fitted weights for the 14 races on 20 September together with a check that those weights reproduce, and a ledger of all 204 races including every ticket bought.
 
-All in Japanese.
+Publication was confirmed with the contest organiser after the contest ended.
+
+## Documentation (Japanese)
 
 | | |
 |---|---|
 | [01-quickstart.md](docs/01-quickstart.md) | From clone to a submitted paper vote |
 | [02-voting-runtime.md](docs/02-voting-runtime.md) | States, journal, recovery, reconciliation |
 | [03-launchd.md](docs/03-launchd.md) | Running it as a macOS agent |
-| [04-data-contract.md](docs/04-data-contract.md) | The panel format, and bringing your own data |
+| [04-data-contract.md](docs/04-data-contract.md) | The data format, and bringing your own |
 | [05-model-pipeline.md](docs/05-model-pipeline.md) | Features, fitting, the dynamic program |
-| [06-safety.md](docs/06-safety.md) | Every gate between a plan and a submission |
+| [06-safety.md](docs/06-safety.md) | Every safeguard between a plan and a submission |
+| [glossary.md](docs/glossary.md) | Glossary |
+
+## Acknowledgements
+
+With thanks to everyone who organised and ran AI 競馬予想マスターズ 2026, and for agreeing to the publication of this repository. I hope it is useful to anyone taking part in future contests.
 
 ## Licence
 
-Apache-2.0. See [LICENSE](LICENSE), [NOTICE](NOTICE) and
-[DISCLAIMER.md](DISCLAIMER.md).
+Apache-2.0. See [LICENSE](LICENSE), [NOTICE](NOTICE) and [DISCLAIMER.md](DISCLAIMER.md).
