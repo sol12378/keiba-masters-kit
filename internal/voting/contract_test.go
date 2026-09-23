@@ -7,10 +7,8 @@ import (
 	"testing"
 )
 
-// The planner is Python and the runtime is Go.  Both hash the same plan, and a
-// mismatch means the daemon rejects a bundle that the planner considers valid.
-// This test pins the contract against a fixture the Python side generates, so
-// a serialization change on either side fails here rather than on a race day.
+// Checks that Go computes the same hashes as the Python planner for the fixture
+// in fixtures/plan_bundle_contract.json.
 func TestPlanBundleHashesMatchThePythonPlanner(t *testing.T) {
 	root, err := FindProjectRoot()
 	if err != nil {

@@ -1,14 +1,7 @@
-"""Building the plan bundle the voting daemon consumes.
+"""Build plan bundles for votingd.
 
-The daemon never computes anything: it receives a frozen bundle of per-race
-payloads, each carrying the SHA-256 of its own content, and its only job is to
-submit each one exactly once and reconcile what came back.  That split is the
-reason a run is auditable — the decision is fixed and hashed before the network
-is touched.
-
-The canonical JSON here must match ``internal/voting`` byte for byte, so the
-hash a Python planner writes is the hash the Go runtime verifies.  Both sides
-serialize with sorted keys and no whitespace.
+JSON is serialised with sorted keys and no whitespace so the hashes match
+``internal/voting``.
 """
 
 from __future__ import annotations
@@ -72,11 +65,9 @@ def bet_id(bet_type: int, selection: Sequence[int]) -> str:
 
 
 def marks_from_win_odds(win_odds: dict[int, float]) -> dict[str, int]:
-    """Fill the required per-horse marks from market rank.
+    """Fill marks from market rank.
 
-    The contest requires a mark for every runner.  Ranking by price is a
-    mechanical way to satisfy that requirement; it is not a forecast, and
-    nothing downstream reads it back.
+    The contest requires a mark per runner. This is not a prediction.
     """
     if not win_odds:
         raise ValueError("no win prices to rank")
@@ -125,10 +116,9 @@ def build_plan(
     target_submit_seconds_before_post: int = 300,
     hard_cutoff_seconds_before_post: int = 240,
 ) -> dict:
-    """One race's frozen decision.
+    """Build the plan for one race.
 
-    ``bets`` is a sequence of ``(bet_id, points)`` pairs.  Points must be whole
-    multiples of 100, which the runtime re-checks before submitting.
+    ``bets`` is a list of ``(bet_id, points)``. Points must be multiples of 100.
     """
     if not bets:
         raise ValueError(f"{race_id}: a plan must carry at least one bet")

@@ -1,11 +1,4 @@
-"""Choosing which combinations to buy at a price the policy table fixed.
-
-The table says *what price to buy*.  Which combinations at that price is a
-separate, much smaller question: candidates within a band sit within a fraction
-of a percent of each other, so the choice barely moves the expected return.  A
-small model weight is enough to decide it, and keeping the weight small is
-deliberate — it keeps the price, not the model, responsible for the outcome.
-"""
+"""Pick combinations close to the target odds set by the policy table."""
 
 from __future__ import annotations
 
@@ -37,11 +30,10 @@ def pick_near_odds(
     count: int,
     model_weight: float = DEFAULT_MODEL_WEIGHT,
 ) -> list[Selection]:
-    """The ``count`` combinations priced closest to ``target_odds``.
+    """Return the ``count`` combinations closest to ``target_odds``.
 
-    Ranking mixes distance-in-price (weight ``1 - model_weight``) with the
-    model's probability ranking (weight ``model_weight``).  Ranks, not raw
-    values, are mixed so the two scales cannot fight each other.
+    Ranking mixes price distance (1 - model_weight) and model probability
+    (model_weight). Ranks are mixed rather than raw values.
     """
     if count < 1:
         raise ValueError(f"count must be at least 1, got {count}")

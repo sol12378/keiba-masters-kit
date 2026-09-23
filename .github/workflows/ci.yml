@@ -41,8 +41,7 @@ jobs:
         run: .venv/bin/python -m pytest -q
 
       - name: Secret scan
-        # The repository ships configuration and a live-service client, so a
-        # credential pasted into a config is the realistic mistake to catch.
+        # Catch credentials accidentally committed to configs.
         run: |
           brew install gitleaks
           gitleaks detect --no-banner --redact

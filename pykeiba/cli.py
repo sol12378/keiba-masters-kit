@@ -104,11 +104,7 @@ def command_policy_table(args: argparse.Namespace) -> int:
 def command_retime(args: argparse.Namespace) -> int:
     """Move one date's races to start a few minutes from now.
 
-    The runtime schedules by wall clock: it submits at ``post - 300s`` and
-    refuses anything past its hard cutoff.  A panel generated with historical
-    post times therefore has nothing left to do.  Retiming lets a demo run
-    against the real scheduler instead of a stubbed clock, which is the part
-    worth seeing.
+    votingd schedules by wall clock, so the demo needs future post times.
     """
     directory = Path(args.panel) / args.date
     if not directory.is_dir():
@@ -120,9 +116,7 @@ def command_retime(args: argparse.Namespace) -> int:
     for index, path in enumerate(paths):
         document = json.loads(path.read_text(encoding="utf-8"))
         post = now + timedelta(minutes=args.first_post_in + index * args.every)
-        # The race date has to follow the post time in the policy's own
-        # timezone, because the runtime cross-checks the two and refuses a plan
-        # whose date and post time disagree.
+        # votingd checks that the race date matches the post time in the policy timezone.
         target_date = post.astimezone(ZoneInfo(args.timezone)).strftime("%Y%m%d")
         document["date"] = target_date
         document["post_at"] = post.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -139,19 +133,13 @@ def command_retime(args: argparse.Namespace) -> int:
 
 
 def command_render_policy(args: argparse.Namespace) -> int:
-    """Stamp a race date into the policy template.
+    """Write a policy for one race date from the template.
 
-    The runtime deliberately refuses a plan whose date does not match the
-    policy it was armed with, so a policy is valid for exactly one day.  That
-    is the mechanism that stops yesterday's bundle being replayed today.
+    votingd rejects plans whose date does not match the policy.
     """
     template = Path(args.template).read_text(encoding="utf-8")
     iso_date = f"{args.date[:4]}-{args.date[4:6]}-{args.date[6:]}"
-    # One state directory per race day.  A day's journal, snapshot and socket
-    # must not be shared with another day's: the runtime refuses to re-import a
-    # plan id whose content differs, so yesterday's leftovers turn today's
-    # import into a conflict, and an operator who forces past it can arm
-    # yesterday's schedule.
+    # Use a separate state directory per race day.
     rendered = template.replace("__RACE_DATE_COMPACT__", args.date).replace("__RACE_DATE__", iso_date)
     document = json.loads(rendered)
     document["policy_id"] = f"{document['policy_id']}-{args.date}"

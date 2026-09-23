@@ -1,29 +1,22 @@
-"""The on-disk race panel this kit reads.
+"""Race panel: one JSON file per race, stored as ``panel/<date>/<race_id>.json``.
 
-A *panel* is a directory of one JSON file per race.  It is deliberately small
-and source-agnostic: this repository ships no race data, and anything that can
-write this shape — your own collector, an export from a data vendor you have a
-licence for, or the bundled synthetic generator — can drive the whole pipeline.
-
-Schema (``panel/<date>/<race_id>.json``)::
+Schema::
 
     {
-      "race_id":  "202606040411",       # 12 ASCII letters/digits
-      "date":     "20260926",           # YYYYMMDD, local race date
+      "race_id":  "202606040411",
+      "date":     "20260926",
       "post_at":  "2026-09-26T05:00:00Z",
-      "captured_at": "2026-09-26T04:50:00Z",   # when these prices were read
-      "win":      {"1": 3.2, "2": 11.4, ...},  # horse number -> win odds
-      "trifecta": {"1-2-3": 320.4, ...},       # ordered triple -> odds
-      "result": {                              # optional; settlement only
+      "captured_at": "2026-09-26T04:50:00Z",
+      "win":      {"1": 3.2, "2": 11.4, ...},
+      "trifecta": {"1-2-3": 320.4, ...},
+      "result": {
         "finish": [5, 2, 7],
         "payout_per_100": {"5-2-7": 4321.0}
       }
     }
 
-``captured_at`` must be strictly before the decision time you claim to have
-used.  Nothing in ``result`` may be read by any function that produces
-probabilities or decisions; :func:`load_race` keeps it in a separate field so
-that separation is visible at the call site.
+``captured_at`` must be before ``post_at``. ``result`` is only used for
+settlement and is kept in a separate field.
 """
 
 from __future__ import annotations
@@ -68,11 +61,9 @@ class Race:
         return (finish[0], finish[1], finish[2])
 
     def payout_per_100(self, triple: tuple[int, int, int]) -> float | None:
-        """Official return per 100 points staked, or None when unsettled.
+        """Official return per 100 points, or None if unknown.
 
-        A settled race with no payout entry for ``triple`` returns 0.0: the
-        ticket lost.  ``None`` means *unknown*, which the caller must not
-        silently treat as a loss.
+        A settled race with no entry for ``triple`` returns 0.0 (the ticket lost).
         """
         if not self.settled:
             return None

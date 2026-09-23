@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
-"""Build the L2 evidence: the NLL surface of the 2026-09-20 model.
+"""Build submission/phase2/nll_surface.npz.
 
-PUBLISHED AS A RECORD of how submission/phase2/nll_surface.npz was produced.
-It needs the T-10 snapshots, which are not in this repository.
-
-Runs against the private repository, where the T-10 snapshots live.  It
-reproduces exactly what ``competition_target_optimizer_20260920.historical``
-and ``.train`` read, then writes out only the objective's *value surface* over
-a grid of the two coefficients.
-
-That surface is enough for a third party to re-run the optimization and
-recover the fitted coefficients, and it contains no odds: a grid of objective
-values cannot be inverted back into the per-combination prices behind it.
+Evaluates the 2026-09-20 model's objective on a grid of the two coefficients
+using the T-10 snapshots in the private research repository
+(KEIBA_RESEARCH_ROOT, default ../keiba). Only objective values are saved.
 """
 from __future__ import annotations
 
@@ -52,11 +44,7 @@ def nll(coefficients, subset) -> float:
 
 
 def surface(subset, coefficient_grid: np.ndarray) -> np.ndarray:
-    """Mean per-race NLL at every column of ``coefficient_grid`` (2 x G).
-
-    One matmul per race per chunk: (n_combinations x 2) @ (2 x chunk).  The
-    per-race loop stays because n_combinations differs between races.
-    """
+    """Mean per-race NLL for every column of ``coefficient_grid`` (2 x G)."""
     total = np.zeros(coefficient_grid.shape[1])
     started = time.time()
     for index, record in enumerate(subset, start=1):

@@ -1,18 +1,7 @@
-"""Replaying a panel through a strategy.
+"""Replay a panel through a strategy.
 
-The backtest is intentionally pessimistic in the two places where a careless
-simulation flatters itself:
-
-* A ticket is settled at the race's **official payout**, not at the price it
-  was bought at.  On synthetic panels that payout is drawn below the quoted
-  price, matching what really happens when money keeps arriving after you bet.
-* A race whose settlement is unknown is **skipped, not treated as a loss**.
-  Counting unknowns as losses would understate the bank; counting them as wins
-  would overstate it.  They are reported separately so the gap is visible.
-
-A single backtest over a few hundred races says very little: hit rates in the
-longshot bands are a couple of percent, so the variance of the final bank is
-enormous.  Use ``repeat`` to see the distribution rather than one path.
+Tickets settle at the official payout, not the bet-time price. Races with
+an unknown settlement are skipped and counted separately.
 """
 
 from __future__ import annotations

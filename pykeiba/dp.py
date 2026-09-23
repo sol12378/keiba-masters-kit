@@ -1,27 +1,10 @@
-"""The state-dependent policy table.
+"""Policy table: backward induction over (races remaining, bank).
 
-A tournament is not the same problem as a betting edge.  With a fixed number of
-races and a bank that must reach some level for the entry to place, the right
-action depends on *where you are*: how many races are left and how much you
-hold.  This module solves that by backward induction over
+Each price band has a return rate R, and a ticket at odds O hits with
+probability R / O. With R < 1 every action loses on average, so the table
+only decides when to take risk.
 
-    state  = (races remaining, bank)
-    action = (price band, number of tickets, stake per ticket)
-
-and writes the argmax out as a table the voting side can simply look up, so no
-optimizer has to run at post time.
-
-What the solver does *not* do
------------------------------
-It assumes no edge.  Each price band carries a return rate ``R`` — the fraction
-of turnover the band pays back — and the hit probability of one ticket at odds
-``O`` is taken as ``R / O``.  With ``R < 1`` every action loses money in
-expectation; the table wins only in the sense of maximizing the chance of
-reaching the goal, by choosing *when* to accept variance.  Feeding it ``R > 1``
-means you are asserting an edge, and the table will happily believe you.
-
-The shipped default is a flat statutory-takeout figure.  Measure your own
-return rates before trusting any number here.
+The default bands use takeout-based figures, not measured returns.
 """
 
 from __future__ import annotations
@@ -43,9 +26,8 @@ __all__ = [
     "simulate_table",
 ]
 
-#: Stake sizing rules, as fractions.  ``gap`` rules size the ticket so a hit
-#: closes the distance to the goal; ``bank`` rules stake a fraction of what is
-#: held.  The solver picks between them per state.
+#: Stake sizing rules. ``gap``: a hit closes a fraction of the gap to the goal.
+#: ``bank``: stake a fraction of the bank.
 DEFAULT_GAP_FRACTIONS = (1.0, 1.2, 1.5, 2.0)
 DEFAULT_BANK_FRACTIONS = (0.01, 0.02, 0.05, 0.10, 0.25)
 DEFAULT_TICKET_CHOICES = (1, 2, 3, 5, 10)
@@ -53,10 +35,9 @@ DEFAULT_TICKET_CHOICES = (1, 2, 3, 5, 10)
 
 @dataclass(frozen=True)
 class PriceBand:
-    """One price band the policy is allowed to buy.
+    """A price band the policy can buy.
 
-    ``return_rate`` is the fraction of turnover the band pays back.  Below 1
-    for any real pari-mutuel pool.
+    ``return_rate`` is the share of turnover paid back (below 1 in practice).
     """
 
     label: str
@@ -73,9 +54,8 @@ class PriceBand:
             raise ValueError(f"{self.label}: max_tickets must be at least 1")
 
 
-#: A neutral starting point: Japanese pari-mutuel pools return roughly 70-80%
-#: of turnover depending on the pool.  These are NOT measurements of any
-#: particular band's realized return; replace them with your own.
+#: Default bands. Return rates are rough takeout-based figures (JRA pools pay
+#: back about 70-80%), not measured values.
 DEFAULT_BANDS: tuple[PriceBand, ...] = (
     PriceBand("win-mid", 10.0, 0.80, max_tickets=3),
     PriceBand("exotic-100", 100.0, 0.75, max_tickets=5),
@@ -178,13 +158,10 @@ def _terminal_value(banks: np.ndarray, spec: PolicySpec) -> np.ndarray:
 
 
 def _enumerate_actions(banks: np.ndarray, spec: PolicySpec, floor: int):
-    """Vectorized action set for one stage.
+    """Enumerate all actions for one stage.
 
-    Returns stacked arrays over (action, bank) for stake, spend, hit
-    probability, and the *continuous* bank reached on a hit and on a miss.
-    The next bank is kept as a real number on purpose: rounding it to the grid
-    would let the solver mint money out of its own discretization, which shows
-    up as a reported probability above the conservation bound.
+    Returns arrays over (action, bank). The next bank is kept as a real number
+    and mapped to the grid by ``_grid_index``.
     """
     unit = spec.stake_unit
     gap = np.maximum(0.0, spec.goal - banks)
@@ -232,16 +209,11 @@ def _enumerate_actions(banks: np.ndarray, spec: PolicySpec, floor: int):
 
 
 def _grid_index(bank_values: np.ndarray, grid: int, n_grid: int) -> np.ndarray:
-    """Index of the grid point at or below a continuous bank.
+    """Grid index at or below a continuous bank.
 
-    Evaluating the value function at the grid point *below* the true bank is
-    deliberate.  The value function is non-decreasing in bank, so flooring can
-    only understate a state, never overstate it.  Rounding to the nearest grid
-    point does overstate it: half the transitions round up, the optimizer finds
-    them, and the solved probability drifts above what conservation allows.
-    The cost of flooring is that the reported value is a lower bound on the
-    policy's true reach probability -- which is the direction a bettor should
-    want to be wrong in.
+    Flooring can only understate a state's value. Rounding to the nearest grid
+    point overstated it and pushed the result above the conservation bound, so
+    the reported value is a lower bound.
     """
     clipped = np.clip(bank_values, 0.0, (n_grid - 1) * grid)
     return np.clip(np.floor(clipped / grid).astype(np.int64), 0, n_grid - 1)
@@ -290,10 +262,8 @@ def solve(spec: PolicySpec, *, report_every: int = 0) -> PolicyTable:
         new_value = np.where(act, best_value, pass_value)
         best_action = np.where(act, best_action, -1)
 
-        # The value of a state is non-decreasing in bank: a richer state can
-        # always copy a poorer one's action and keep the difference.  Where the
-        # discretized grid says otherwise, adopt the poorer state's action and
-        # record which bank it was sized for.
+        # Value is non-decreasing in bank. Where the grid breaks that, reuse the
+        # poorer state's action and record which bank it was sized for.
         monotone = np.maximum.accumulate(new_value)
         source = np.maximum.accumulate(np.where(new_value >= monotone, positions, 0))
         value = monotone
@@ -349,11 +319,9 @@ def solve(spec: PolicySpec, *, report_every: int = 0) -> PolicyTable:
 
 
 def _reach_upper_bound(spec: PolicySpec) -> float:
-    """``P(reach) <= R_max * initial / goal``.
+    """Upper bound ``P(reach) <= R_max * initial / goal``.
 
-    Money is conserved up to the return rate, so no sequence of bets can move
-    more than ``R_max`` of the starting bank across the finish line.  It is a
-    useful sanity check: a solver reporting more than this has a bug.
+    A solved value above this indicates a bug.
     """
     best_return = max(band.return_rate for band in spec.bands)
     return float(min(1.0, best_return * spec.initial_bank / spec.goal))
@@ -388,15 +356,10 @@ def index_table(table: PolicyTable) -> dict[tuple[int, int], dict]:
 
 
 def simulate_table(table: PolicyTable, *, paths: int = 20_000, seed: int = 11) -> dict:
-    """Forward Monte-Carlo check of a solved table.
+    """Monte Carlo check of a solved table.
 
-    The backward solve reports a value computed on a discretized grid.  This
-    replays the table forward under the same return-rate assumptions and
-    reports what actually happens, so a formulation error shows up as a gap
-    between the two numbers rather than hiding inside the solver.
-
-    It verifies the *solver*, not the world: it reuses the table's own return
-    rates, so it cannot tell you whether those rates are right.
+    Replays the table under the same return rates. This checks the solver, not
+    whether the return rates are right.
     """
     rng = np.random.default_rng(seed)
     grid = int(table.spec["bank_grid"])

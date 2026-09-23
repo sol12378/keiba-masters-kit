@@ -1,9 +1,4 @@
-"""The submission package has to keep working, and keep saying the same thing.
-
-These are not tests of the strategy. They check that the frozen record stays
-executable and stays consistent with the numbers it claims, so a refactor
-somewhere else cannot quietly invalidate what was handed to the organiser.
-"""
+"""Checks that the submission package still runs and matches its README."""
 
 import json
 import subprocess

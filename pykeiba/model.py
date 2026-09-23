@@ -1,19 +1,8 @@
-"""The two-column log-linear model.
+"""Two-feature log-linear model.
 
-Features, for every ordered triple quoted in a race:
-
-1. ``log`` of the trifecta pool's own overround-free probability
-2. ``log`` of the Harville probability implied by the win pool
-
-Both columns are market-derived; the model only learns how much weight to put
-on each.  Fitting is a regularized conditional maximum likelihood over the
-races' winning combination — a single softmax per race, so the fit sees one
-observation per race, not one per ticket.
-
-This model is small on purpose.  With two coefficients and a few hundred races
-it cannot be expected to beat the market, and the shipped defaults make the
-market column dominate.  Treat any holdout improvement as small until your own
-evaluation says otherwise.
+Features for each trifecta combination: log market probability and log
+Harville probability. Fitted by ridge-regularised conditional maximum
+likelihood, one observation per race.
 """
 
 from __future__ import annotations
@@ -80,10 +69,9 @@ class Model:
 
 
 def build_features(race: Race) -> RaceFeatures:
-    """Two log-probability columns for every quoted triple in one race.
+    """Build the two log-probability features for one race.
 
-    Raises ``ValueError`` when the race lacks a complete pair of markets; a
-    partially captured race is dropped rather than imputed.
+    Raises ValueError if the trifecta market is missing.
     """
     if not race.trifecta_odds:
         raise ValueError(f"{race.race_id}: no trifecta market was captured")
@@ -132,15 +120,10 @@ def train(
     model_id: str = "trifecta-loglinear-v1",
     blend: float = DEFAULT_BLEND,
 ) -> Model:
-    """Fit the two coefficients on a chronological split.
+    """Fit the two coefficients.
 
-    ``holdout_from`` is a ``YYYYMMDD`` date: races on or after it are held out
-    and never touched by the optimizer.  Pass ``None`` to fit on everything,
-    which produces a model with no holdout evidence attached.
-
-    The ridge term pulls the market coefficient toward 1 and the Harville
-    coefficient toward 0, i.e. toward "use the quoted price and nothing else".
-    Moving away from that prior has to be paid for by likelihood.
+    Races on or after ``holdout_from`` (YYYYMMDD) are held out. The ridge term
+    pulls the coefficients toward (1, 0), i.e. market price only.
     """
     usable = [item for item in features if item.winner_index is not None]
     if not usable:

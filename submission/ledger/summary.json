@@ -109,9 +109,9 @@
  ],
  "reconciliation_notes": {
   "commentary": [
-   "The three day ledgers hold 203 races and 1,224,300 points staked. The daemon snapshots hold 204 and 1,227,300. The difference is one race on 2026-09-13, 202606040404, staking 3,000 points, which the old ledger never recorded. The snapshot is the authoritative side: it carries the armed plan, the payload hash the daemon recomputed, and the CONFIRMED state.",
-   "No settlement was captured locally for 202606040404, so its payout is published as null rather than as zero. The arithmetic bounds it anyway: official final bank minus (opening - stake + payouts) leaves 6,200 points unexplained, of which 5,200 are confirmed refunds on scratched runners. Any payout P on that race would make the residue 6,200 - P, so P is at most 1,000. A winning trifecta on a 3,000-point stake in the bands this policy buys pays orders of magnitude more than 1,000, so the race lost. It is left as null because that is an inference, not a captured settlement.",
-   "1,000 points of the 6,200 remain unattributed. They are not this race's payout, by the bound above. They are recorded here unresolved rather than absorbed into a total."
+   "以前の台帳（3ファイル）は203レース・1,224,300pt、投票デーモンのスナップショットは204レース・1,227,300ptです。差は2026-09-13のレース202606040404（3,000pt）で、以前の台帳に記録漏れがありました。スナップショットには送信を許可した計画、デーモンが再計算したハッシュ値、確定（CONFIRMED）状態が記録されているため、本台帳ではスナップショットを採用しています。",
+   "202606040404は払戻の記録を手元で取得できていないため、payoutをnullとしています。ただし、大会の最終残高と計算上の残高の差は6,200ptで、そのうち5,200ptは出走取消・競走除外による返還と確認済みです。このレースの払戻をPとすると差は6,200−Pとなるため、Pは最大でも1,000ptです。この価格帯の三連単が3,000ptの投票で的中した場合の払戻はこれより桁違いに大きいので、このレースは外れと考えられます。推定であり実際の払戻記録ではないため、nullのままにしています。",
+   "差額6,200ptのうち1,000ptは内訳を特定できていません。上記のとおり202606040404の払戻ではありません。合計に含めず、未特定のまま記録しています。"
   ],
   "duplicate_race_ids_with_differing_payloads": [],
   "ledger_rows_with_no_snapshot": [],

@@ -1,9 +1,5 @@
 #!/bin/bash
-# Install, inspect and remove the macOS launchd agent for votingd.
-#
-# macOS only, by design.  The kit does not ship systemd units or Windows
-# services: scheduling is the part most tied to the platform, and shipping
-# three half-tested variants would be worse than shipping one that works.
+# Install, inspect and remove the launchd agent for votingd (macOS only).
 #
 #   scripts/launchd.sh install --policy var/policy_20260922.json [--driver paper]
 #   scripts/launchd.sh status
@@ -46,8 +42,7 @@ case "$command" in
     case "$driver" in
       paper) ;;
       live)
-        # The live driver submits real contest votes.  Make that a decision
-        # someone types out, not a default anyone drifts into.
+        # Ask for confirmation before installing with the live driver.
         echo "The 'live' driver submits votes to the official contest endpoint."
         echo "It only works while the contest is open, and it uses your account."
         printf "Type 'live' to confirm: "
@@ -59,11 +54,9 @@ case "$command" in
     [ -x bin/votingd ] || go build -o bin/votingd ./cmd/votingd
     mkdir -p "$AGENT_DIR" var/log
 
-    # A launchd agent inherits almost nothing, so the date-scoped variable the
-    # policy requires is absent and the day cannot be armed.  That is the safe
-    # default: an agent installed and forgotten can never submit.  Passing
-    # --enable-submission copies the policy's required_environment into the
-    # plist.  It is not a credential -- it is the operator saying "today".
+    # launchd agents do not inherit the shell environment, so the day cannot be
+    # armed unless --enable-submission copies the policy's required_environment
+    # (a date, not a credential) into the plist.
     if [ "$enable_submission" = "0" ]; then
       echo "note: installed without --enable-submission, so the agent will run"
       echo "      but refuse to arm a day. Re-install with --enable-submission"

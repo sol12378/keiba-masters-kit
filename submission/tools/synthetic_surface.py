@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
-"""Turn a synthetic race into the odds-surface manifest phase 1 expects.
+"""Convert a synthetic race into the odds manifest used by submission/phase1.
 
-The scripts under ``submission/`` are the ones that actually ran during the
-contest, and they read a snapshot manifest produced by the collector.  Those
-snapshots are captured odds: they belong to the sites they came from and this
-repository cannot redistribute them.
+The real snapshots cannot be redistributed, so this lets the phase 1
+scripts run on synthetic odds.
 
-This converter closes that gap.  It writes the same manifest schema from
-``pykeiba.synth`` output, so anyone can execute the real decision path
-end to end -- odds in, plan and stake out -- without a single real price
-changing hands.
-
-What it does not do: prove that the real snapshots had this shape.  For that,
-``submission/ledger/`` carries the SHA-256 of every real input that was used.
-
-    python3 submission/tools/synthetic_surface.py \
-        --panel data/synthetic --race-id <id> --out surface.json
+    python3 submission/tools/synthetic_surface.py --panel data/synthetic --out surface.json
 """
 
 from __future__ import annotations
@@ -33,14 +22,8 @@ from pykeiba.harville import order_probability  # noqa: E402
 from pykeiba.odds import win_probabilities  # noqa: E402
 from pykeiba.panel import load_panel  # noqa: E402
 
-#: Pool numbering used by the collector's manifests, mirrored from
-#: ``build_vote_plan.ODDS_TYPE``.
-#:
-#: Note that this is NOT the bet-id numbering.  A bet id counts pools in the
-#: official order (b7 trio, b8 trifecta), while a manifest's odds_type skips 7
-#: and uses 8 for the trio and 9 for the trifecta.  The two schemes agree up to
-#: 6 and then diverge, which is exactly the sort of thing that silently
-#: produces "the pool is not quoted" instead of a wrong price.
+#: odds_type numbering used in the manifests (same as build_vote_plan.ODDS_TYPE).
+#: Not the bet-id numbering: 7 is unused, 8 is the trio and 9 the trifecta.
 ODDS_TYPE = {
     "win": 1,
     "place": 2,
@@ -52,9 +35,7 @@ ODDS_TYPE = {
     "sanrentan": 9,
 }
 
-#: Fraction of turnover each pool returns, used to price the pools the
-#: synthetic panel does not quote directly.  These are round statutory-ish
-#: figures, not measurements.
+#: Approximate return rates for pools the panel does not quote (not measured).
 RETURN_RATE = {
     "place": 0.80,
     "wakuren": 0.775,
@@ -72,12 +53,10 @@ def _price(probability: float, return_rate: float) -> float | None:
 
 
 def build_surface(race, seconds_to_post: int = 300) -> dict:
-    """Manifest for one race: every pool phase 1 may be told to buy.
+    """Build the manifest for one race.
 
-    The panel quotes win and trifecta directly.  The other pools are derived
-    from the win market through the same Harville construction the model uses,
-    then marked up by a takeout.  They exist so the policy table can name any
-    pool and still find a price; they are not claimed to match a real board.
+    Win and trifecta come from the panel. The other pools are derived from the
+    win market with Harville and a takeout, so the policy can name any pool.
     """
     win_p = win_probabilities(race.win_odds)
     horses = sorted(race.win_odds)

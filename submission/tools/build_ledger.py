@@ -1,17 +1,8 @@
 #!/usr/bin/env python3
-"""Assemble the published ledger from the daemon snapshots and day ledgers.
+"""Build submission/ledger/ from the votingd snapshots and the day ledgers.
 
-PUBLISHED AS A RECORD of how submission/ledger/ was produced. Its inputs are
-not in this repository.
-
-The authoritative record of *what was submitted* is the voting daemon's own
-snapshot: it holds the plan the operator armed, the payload hash the daemon
-recomputed, the state it reached, and the balance the service reported back.
-The authoritative record of *what came back* is the per-day ledger, which
-carries the settled payout per race.
-
-This joins the two and reports what does not line up rather than smoothing it
-over.  Reconciliation gaps are part of the record.
+The inputs are in the private research repository (KEIBA_RESEARCH_ROOT,
+default ../keiba). Kept here as a record of how the ledger was produced.
 """
 from __future__ import annotations
 
@@ -21,9 +12,7 @@ import os
 import sys
 from pathlib import Path
 
-# The private research repository, which holds the daemon snapshots and the
-# day ledgers.  Neither is in this repository; this script records how the
-# published ledger was derived from them.
+# Private research repository with the snapshots and day ledgers.
 ROOT = Path(os.environ.get("KEIBA_RESEARCH_ROOT", "../keiba")).expanduser().resolve()
 EVIDENCE = ROOT / "outputs/competition-2026"
 OUT = Path(sys.argv[1] if len(sys.argv) > 1 else "/tmp/ledger")
@@ -53,9 +42,8 @@ LEDGERS = [
 #: The balance the service itself reported at the close of the window.
 OFFICIAL_FINAL_BANK = 5_504_260
 
-#: What actually chose the bet in each policy.  ``policy_table_lookup`` means
-#: build_vote_plan.lookup() was called with (races remaining, bank); the others
-#: carry their price band and ticket count as constants.
+#: How each policy decided the bet. ``policy_table_lookup`` means
+#: build_vote_plan.lookup() was called; the others use fixed bands.
 DECISION_MECHANISM = {
     "COMPETITION-2026-V17": "policy_table_lookup",
     "COMPETITION-2026-V18-TAIL133": "fixed_band_with_target_backsolve",
@@ -70,26 +58,21 @@ DECISION_MECHANISM = {
 }
 
 RECONCILIATION_COMMENTARY = [
-    "The three day ledgers hold 203 races and 1,224,300 points staked. The "
-    "daemon snapshots hold 204 and 1,227,300. The difference is one race on "
-    "2026-09-13, 202606040404, staking 3,000 points, which the old ledger "
-    "never recorded. The snapshot is the authoritative side: it carries the "
-    "armed plan, the payload hash the daemon recomputed, and the CONFIRMED "
-    "state.",
+    "以前の台帳（3ファイル）は203レース・1,224,300pt、投票デーモンのスナップショットは"
+    "204レース・1,227,300ptです。差は2026-09-13のレース202606040404（3,000pt）で、"
+    "以前の台帳に記録漏れがありました。スナップショットには送信を許可した計画、"
+    "デーモンが再計算したハッシュ値、確定（CONFIRMED）状態が記録されているため、"
+    "本台帳ではスナップショットを採用しています。",
 
-    "No settlement was captured locally for 202606040404, so its payout is "
-    "published as null rather than as zero. The arithmetic bounds it anyway: "
-    "official final bank minus (opening - stake + payouts) leaves 6,200 "
-    "points unexplained, of which 5,200 are confirmed refunds on scratched "
-    "runners. Any payout P on that race would make the residue 6,200 - P, so "
-    "P is at most 1,000. A winning trifecta on a 3,000-point stake in the "
-    "bands this policy buys pays orders of magnitude more than 1,000, so the "
-    "race lost. It is left as null because that is an inference, not a "
-    "captured settlement.",
+    "202606040404は払戻の記録を手元で取得できていないため、payoutをnullとしています。"
+    "ただし、大会の最終残高と計算上の残高の差は6,200ptで、そのうち5,200ptは"
+    "出走取消・競走除外による返還と確認済みです。このレースの払戻をPとすると"
+    "差は6,200−Pとなるため、Pは最大でも1,000ptです。この価格帯の三連単が"
+    "3,000ptの投票で的中した場合の払戻はこれより桁違いに大きいので、このレースは"
+    "外れと考えられます。推定であり実際の払戻記録ではないため、nullのままにしています。",
 
-    "1,000 points of the 6,200 remain unattributed. They are not this race's "
-    "payout, by the bound above. They are recorded here unresolved rather "
-    "than absorbed into a total.",
+    "差額6,200ptのうち1,000ptは内訳を特定できていません。上記のとおり"
+    "202606040404の払戻ではありません。合計に含めず、未特定のまま記録しています。",
 ]
 
 
@@ -190,11 +173,7 @@ def main() -> None:
             if entry["payout"] > 0:
                 day["hits"] += 1
 
-    # Which policy actually decided each race.  Worth having in the data
-    # rather than only in prose: only the first day's races were decided by a
-    # state-dependent lookup into the policy table.  The rest ran on fixed
-    # rules, one of which was frozen from a table output and then applied
-    # unchanged to every eligible race.
+    # Totals per policy.
     by_policy: dict[str, dict] = {}
     for entry in confirmed:
         row = by_policy.setdefault(entry["policy_id"], {
@@ -210,9 +189,7 @@ def main() -> None:
     total_stake = sum(e["stake"] for e in confirmed)
     total_payout = sum(e["payout"] or 0 for e in confirmed)
     summary = {
-        # Derived from the races themselves rather than labelled by hand, so
-        # it states the range that was actually bet and cannot drift from the
-        # contest's own dates.
+        # First and last race date in the ledger.
         "race_date_range": [confirmed[0]["race_date"], confirmed[-1]["race_date"]] if confirmed else None,
         "races_confirmed": len(confirmed),
         "races_not_confirmed": [

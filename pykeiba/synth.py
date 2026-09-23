@@ -1,22 +1,8 @@
-"""A synthetic season, so the pipeline runs with no data of its own.
+"""Synthetic season generator.
 
-This repository ships no race data.  Historical odds and results are covered by
-third-party terms, and the bulk captures behind the original work are far too
-large to distribute.  What it ships instead is a generator that produces the
-same panel shape with known ground truth, which is better than real data for
-three things: the whole pipeline runs on a fresh clone, tests are deterministic,
-and you can check the estimators against the truth that produced the sample.
-
-The generator is deliberately honest about the market:
-
-* Quoted prices come from a market that is *nearly* efficient — its
-  probabilities are the true ones perturbed by noise, then marked up by a
-  takeout.  There is no exploitable edge planted in the data.
-* Winning tickets settle **below** their decision-time price by default.
-  Money keeps arriving after you bet, so the pool you are paid from is larger
-  than the one you priced against.  This is what the allocator's
-  ``odds_factor`` exists to absorb; leaving it out of the simulation would make
-  every strategy look better than it is.
+Market probabilities are the true probabilities plus noise, marked up by
+takeout, so there is no edge to find. Winning tickets settle below the
+quoted price (median 0.85x) to reflect late money.
 """
 
 from __future__ import annotations

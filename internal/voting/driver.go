@@ -12,19 +12,14 @@ const (
 	DriverLive  = "live"
 )
 
-// DefaultOpeningBalance is the contest's starting bankroll in virtual points.
-// The paper driver uses it so a local run starts from the same state a contest
-// entry does.
+// DefaultOpeningBalance is the contest's starting balance in virtual points.
 const DefaultOpeningBalance = 1_000_000
 
-// NewDriver builds the submission driver named by driverName.
+// NewDriver returns the submission driver.
 //
-//   - "paper" (default) runs entirely offline against a local state file.  It
-//     needs no account and no network, and it is the only driver that works
-//     after the contest has closed.
-//   - "live" talks to the official contest endpoint.  It requires a contest
-//     account and only works while the contest is accepting votes; outside the
-//     contest period every submission is rejected upstream.
+//   - "paper" (default): offline, local state file.
+//   - "live": the contest API. Needs an account and only works while the
+//     contest is accepting votes.
 func NewDriver(driverName string, config RuntimeConfig) (API, error) {
 	switch strings.ToLower(strings.TrimSpace(driverName)) {
 	case "", DriverPaper:
@@ -36,13 +31,9 @@ func NewDriver(driverName string, config RuntimeConfig) (API, error) {
 	}
 }
 
-// CredentialsFor returns the credentials provider that matches a driver.
-//
-// The paper driver authenticates nothing, so requiring KEIBA_LOGIN_ID and
-// KEIBA_PASSWORD from it would be theatre -- and worse than theatre under
-// launchd, where an agent inherits neither and every race fails on a login
-// that was never going to reach a network.  The live driver keeps reading them
-// from the environment, which is the only place they belong.
+// CredentialsFor returns the credentials provider for a driver. Only the live
+// driver reads KEIBA_LOGIN_ID and KEIBA_PASSWORD; the paper driver uses fixed
+// local values so it also works under launchd.
 func CredentialsFor(driverName string) CredentialsProvider {
 	if strings.EqualFold(strings.TrimSpace(driverName), DriverLive) {
 		return EnvironmentCredentials

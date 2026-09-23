@@ -1,9 +1,7 @@
-"""Harville ordered-finish probabilities from win probabilities.
+"""Harville ordered-finish probabilities.
 
-The Harville model assumes that, once the winner is removed, the remaining
-runners keep their relative win probabilities.  It is known to understate
-longshots' place chances, so it is used here only as a *second market-derived
-column* next to the quoted combination price — never as a standalone forecast.
+Harville tends to understate longshots' place chances, so it is only used
+as a second market-derived feature.
 """
 
 from __future__ import annotations
@@ -37,10 +35,9 @@ def order_probability(order: Sequence[int], win_p: Mapping[int, float]) -> float
 def combination_probability(
     selection: Sequence[int], win_p: Mapping[int, float], *, ordered: bool
 ) -> float:
-    """Probability for one ticket.
+    """Probability of one ticket.
 
-    ``ordered`` distinguishes an exacta/trifecta (one finishing order settles
-    it) from a quinella/trio (any permutation settles it).
+    ``ordered`` is True for exacta/trifecta and False for quinella/trio.
     """
     if len(selection) == 1:
         return order_probability(selection, win_p)

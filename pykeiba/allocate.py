@@ -1,16 +1,8 @@
-"""Turning probabilities into an amount to stake on which combinations.
+"""Stake allocation for the target-balance strategy.
 
-The allocation answers one question per race: *given a bank, a target balance
-and a budget for this race, which tickets maximize the chance that a hit puts
-the bank at or above the target?*
-
-Two things are worth being explicit about, because they are easy to overstate:
-
-* Probabilities are used only to rank candidates and to size the shortlist.
-  The target balance, the candidate filter and the stopping rule are separate
-  decision rules.  A hit does not mean "the model predicted the winner".
-* The knapsack is optimal *within one race's budget*.  It is not a globally
-  optimal multi-race or multi-player strategy.
+Each ticket is sized so that one hit reaches the target, then a 0/1 knapsack
+picks tickets within the race budget. Probabilities are only used for
+ranking; the target and filters are separate rules.
 """
 
 from __future__ import annotations
@@ -27,9 +19,8 @@ from .panel import Race
 
 __all__ = ["Candidate", "Allocation", "CandidateFilter", "candidates", "race_allowance", "allocate"]
 
-#: Fraction of the quoted price assumed to survive to settlement.  Winning
-#: tickets settle below their decision-time price because the pool moves after
-#: you bet; sizing against the full quote systematically undershoots the target.
+#: Expected ratio of the settled payout to the bet-time odds. Winning tickets
+#: usually pay less than the odds at bet time.
 DEFAULT_ODDS_FACTOR = 0.80
 
 #: Points per unit.  Stakes are always whole multiples of this.
@@ -41,12 +32,10 @@ MAX_SHORTLIST = 200
 
 @dataclass(frozen=True)
 class CandidateFilter:
-    """Which combinations are allowed to be bought at all.
+    """Which combinations may be bought.
 
-    The defaults describe a longshot policy: a price band, the market favourite
-    excluded from the winning position, and at least one unfancied runner in
-    the combination.  They are a *policy choice*, not a finding — change them
-    and the whole character of the strategy changes.
+    The defaults are a longshot policy (price band, no favourite first, at least
+    one outsider). They are a policy choice, not a result.
     """
 
     min_odds: float = 375.0
@@ -117,10 +106,9 @@ def candidates(race: Race, features: RaceFeatures, model: Model, rule: Candidate
 
 
 def race_allowance(budget: int, remaining_slots: int, total_slots: int) -> int:
-    """Split ``budget`` across the remaining races with linear time weights.
+    """Split the budget over the remaining races with linear weights.
 
-    Slot *i* of *n* gets weight ``i``, so later races get more.  A slot that
-    goes unused rolls its share forward, and the last slot may spend the rest.
+    Later races get more. Unused budget rolls forward.
     """
     if not 1 <= remaining_slots <= total_slots:
         raise ValueError(f"remaining_slots must be within [1, {total_slots}], got {remaining_slots}")
@@ -139,11 +127,10 @@ def allocate(
     max_shortlist: int = MAX_SHORTLIST,
     spend_remainder: bool = False,
 ) -> Allocation:
-    """0/1 knapsack over the shortlist, in ``STAKE_UNIT`` units.
+    """0/1 knapsack over the shortlist in 100-point units.
 
-    Each ticket is sized so that, on its own, a hit lands the bank at or above
-    ``target``.  Because every ticket in a race is mutually exclusive, the
-    objective is simply the sum of the chosen tickets' probabilities.
+    Tickets in one race are mutually exclusive, so the objective is the sum of
+    their probabilities.
     """
     allowance = min(int(bank), int(allowance)) // STAKE_UNIT * STAKE_UNIT
     if bank >= target:
@@ -188,9 +175,7 @@ def allocate(
 
     total_stake = sum(stake for _, stake in picked)
     if spend_remainder and picked and allowance > total_stake:
-        # Only a race that will not be followed by another may spend the
-        # rounding remainder: every ticket was already sized against the full
-        # allowance, so topping one up cannot pull another below the target.
+        # Last race only: spend the rounding remainder on the top ticket.
         candidate, stake = picked[0]
         picked[0] = (candidate, stake + (allowance - total_stake))
         total_stake = allowance

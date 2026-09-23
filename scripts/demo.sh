@@ -1,10 +1,7 @@
 #!/bin/bash
-# End-to-end local run: synthetic panel -> model -> policy table -> plan bundle
-# -> voting daemon -> paper submission -> reconciliation -> ledger.
-#
-# Nothing here touches the network or needs an account.  The driver is the
-# paper driver, which accepts votes into a local file and answers the same
-# confirmation query the live endpoint answers.
+# Local end-to-end demo: synthetic data -> model -> policy table -> plan ->
+# votingd (paper driver) -> submission -> reconciliation.
+# No network or account is needed.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -16,11 +13,7 @@ EVERY="${EVERY:-2}"
 say() { printf '\n\033[1m== %s\033[0m\n' "$1"; }
 
 say "0/8  Reset this demo's runtime state"
-# Only this demo's own directory, and only ever under var/.  The runtime is
-# append-only by design: it refuses to re-import a plan id whose content
-# differs, which is exactly what a second demo run would try to do.
-# The rendered policy gives each race day its own directory, so a second run
-# on the same day is the case that needs clearing.
+# Clear today's state so the demo can be run again on the same day.
 STATE_DIR="var/voting-$(date +%Y%m%d)"
 case "$STATE_DIR" in var/*) rm -rf -- "$STATE_DIR" ;; *) echo "refusing to clear $STATE_DIR" >&2; exit 1 ;; esac
 echo "cleared $STATE_DIR"
@@ -55,9 +48,7 @@ BUNDLE="var/plans/bundle_${RACE_DATE}.json"
 BUNDLE_SHA=$("$PYTHON" -c "import json,sys;print(json.load(open('$BUNDLE'))['bundle_sha256'])")
 
 say "7/8  Start votingd on the paper driver and arm the bundle"
-# Submission is gated on a date-scoped environment variable that the policy
-# names.  It is deliberately awkward: arming a day has to be a decision
-# someone makes today, not a flag left on from last week.
+# The policy requires this date-scoped variable before a day can be armed.
 export KEIBA_ENABLE_SUBMISSION="${RACE_DATE:0:4}-${RACE_DATE:4:2}-${RACE_DATE:6:2}"
 ./bin/votingd --policy "var/policy_${RACE_DATE}.json" --driver paper \
   >> "var/votingd.${RACE_DATE}.log" 2>&1 &

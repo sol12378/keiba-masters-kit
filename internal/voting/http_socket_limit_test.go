@@ -7,10 +7,7 @@ import (
 	"testing"
 )
 
-// A deep checkout pushes the control socket past sockaddr_un's 104-byte
-// sun_path and bind() answers with a bare "invalid argument", which reads like
-// a permissions problem and is not one.  The listener should name the real
-// cause before anyone goes looking in the wrong place.
+// A socket path over the 104-byte limit should fail with a clear message.
 func TestControlSocketPathOverThePlatformLimitIsExplained(t *testing.T) {
 	root, err := filepath.EvalSymlinks(t.TempDir())
 	if err != nil {
@@ -29,8 +26,7 @@ func TestControlSocketPathOverThePlatformLimitIsExplained(t *testing.T) {
 }
 
 func TestControlSocketPathWithinTheLimitIsAccepted(t *testing.T) {
-	// t.TempDir() is already too deep on macOS, which is the whole point of
-	// the check above, so this needs a deliberately short directory.
+	// t.TempDir() is too long on macOS, so use a short directory.
 	root, err := os.MkdirTemp("", "vsock")
 	if err != nil {
 		t.Fatalf("MkdirTemp: %v", err)

@@ -12,15 +12,9 @@ import (
 	"sync"
 )
 
-// PaperDriver is a local, offline implementation of API.  It accepts votes,
-// stores them on disk, and replays them through the same confirmation path the
-// live driver uses, so the whole runtime (arm, precheck, submit, GET
-// reconciliation, ledger) can be exercised without an account and without any
-// network access.
-//
-// It is the default driver.  The live competition endpoint only accepts votes
-// while the contest is running, so after the contest closes this driver is the
-// only way to run the system end to end.
+// PaperDriver is an offline implementation of API that records votes in a local
+// file. It is the default driver and works without an account or network,
+// including after the contest has ended.
 type PaperDriver struct {
 	path    string
 	mutex   sync.Mutex
@@ -35,8 +29,7 @@ type paperState struct {
 	Votes   map[string]CheckedVote `json:"votes"`
 }
 
-// NewPaperDriver opens (or creates) a paper-driver state file.  The file holds
-// only accepted votes and the simulated balance; it never holds credentials.
+// NewPaperDriver opens or creates the state file (votes and simulated balance).
 func NewPaperDriver(path string, openingBalance int) (*PaperDriver, error) {
 	if strings.TrimSpace(path) == "" {
 		return nil, errors.New("paper driver requires a state path")
@@ -67,8 +60,7 @@ func NewPaperDriver(path string, openingBalance int) (*PaperDriver, error) {
 	return driver, nil
 }
 
-// Login accepts any non-empty credential pair.  The paper driver authenticates
-// nothing: it exists so the caller can exercise the token lifecycle.
+// Login accepts any non-empty credentials and returns a fixed token.
 func (driver *PaperDriver) Login(_ context.Context, loginID, password string) (string, error) {
 	if strings.TrimSpace(loginID) == "" || strings.TrimSpace(password) == "" {
 		return "", errors.New("login credentials are required")
@@ -76,9 +68,8 @@ func (driver *PaperDriver) Login(_ context.Context, loginID, password string) (s
 	return paperAccessToken, nil
 }
 
-// Check reports the stored vote for raceID.  When no vote exists it returns the
-// same empty-precheck error shape the live API produces, so the runtime's
-// fail-closed precheck logic is exercised unchanged.
+// Check returns the stored vote. With no vote it returns the same
+// empty-precheck error as the live API.
 func (driver *PaperDriver) Check(_ context.Context, token, raceID string) ([]CheckedVote, error) {
 	if strings.TrimSpace(token) == "" {
 		return nil, errors.New("access token is required")
@@ -102,8 +93,7 @@ func (driver *PaperDriver) Check(_ context.Context, token, raceID string) ([]Che
 	return votes, nil
 }
 
-// Submit records a vote.  A race may be voted exactly once, matching the live
-// contest rule the runtime is built around.
+// Submit records a vote. Each race can be voted only once.
 func (driver *PaperDriver) Submit(_ context.Context, token string, payload RacePayload) (SubmitReceipt, error) {
 	if strings.TrimSpace(token) == "" {
 		return SubmitReceipt{}, errors.New("access token is required")
@@ -145,11 +135,7 @@ func (driver *PaperDriver) Submit(_ context.Context, token string, payload RaceP
 	for horse, value := range payload.Mark {
 		mark[horse] = value
 	}
-	// Record the bets exactly as submitted, in the submitted order.
-	// Reconciliation compares the canonical JSON of the whole payload, and a
-	// JSON array is ordered, so re-sorting here would make every read-back
-	// disagree with the plan and halt the day on a CONFLICT the operator did
-	// not cause.
+	// Keep the submitted order; reconciliation compares the JSON array as-is.
 	driver.votes[payload.RaceID] = CheckedVote{RaceID: payload.RaceID, Mark: mark, Bet: bets}
 	driver.balance -= stake
 	if err := driver.persistLocked(); err != nil {

@@ -1,10 +1,4 @@
-"""The planner's half of the cross-language hash contract.
-
-``internal/voting/contract_test.go`` reads the same fixture and recomputes the
-same digests in Go.  If either side changes how it serializes a plan, one of
-the two tests fails immediately instead of a bundle being rejected on a race
-day.
-"""
+"""Python side of the plan hash contract (see internal/voting/contract_test.go)."""
 
 import json
 from datetime import UTC, datetime

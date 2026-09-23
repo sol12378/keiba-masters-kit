@@ -1,9 +1,4 @@
-"""Market prices to market probabilities.
-
-Every quantity here comes from the tote board at decision time.  Nothing in this
-module is a prediction: it removes the overround from quoted prices so the rest
-of the pipeline can treat the market as a probability distribution.
-"""
+"""Convert odds to market probabilities with the overround removed."""
 
 from __future__ import annotations
 
@@ -29,12 +24,9 @@ def overround(odds: Mapping[int, float]) -> float:
 
 
 def win_probabilities(win_odds: Mapping[int, float]) -> dict[int, float]:
-    """Overround-free win probabilities, keyed by horse number.
+    """Overround-free win probabilities keyed by horse number.
 
-    This is the model's *input*, not its output.  Proportional (rather than
-    power or logistic) devigging is used because it is the only choice that
-    needs no fitted parameter, so the market column stays free of anything
-    estimated from results.
+    Uses proportional normalisation, which has no fitted parameter.
     """
     _validate(win_odds)
     implied = {int(horse): 1.0 / float(price) for horse, price in win_odds.items()}

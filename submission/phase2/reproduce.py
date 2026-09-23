@@ -1,20 +1,9 @@
 #!/usr/bin/env python3
-"""Re-derive the 2026-09-20 model's coefficients from the published surface.
+"""Re-derive the 2026-09-20 model coefficients from nll_surface.npz.
 
-``optimizer.py`` is the script that ran. It reads T-10 snapshots, builds two
-log-probability columns per race, and minimizes a ridge-penalised conditional
-NLL. Those snapshots are captured odds and cannot be redistributed, so running
-it as-is is not possible outside the machine it ran on.
-
-What ships instead is the objective itself: ``nll_surface.npz`` holds the mean
-per-race NLL evaluated on a grid of the two coefficients, for the training set
-and the holdout set separately. Interpolating it and minimizing recovers the
-fitted coefficients, and reading it at two points gives the holdout numbers.
-
-A grid of means over races contains no per-combination price, so nothing about
-the underlying odds travels with it. The trade is explicit: this verifies the
-optimization, not the construction of the features. For that,
-``model.json`` carries the SHA-256 of all 155 training inputs.
+The training odds cannot be redistributed, so the objective values on a grid
+of the two coefficients are published instead. This checks the optimisation,
+not the feature construction (model.json lists the SHA-256 of the inputs).
 
     python3 submission/phase2/reproduce.py
 """
@@ -30,8 +19,7 @@ from scipy.optimize import minimize
 
 HERE = Path(__file__).resolve().parent
 
-#: How closely the surface has to agree with the recorded run. The surface is
-#: sampled at 0.002 in c0, so cubic interpolation lands far inside this.
+#: Allowed difference from the recorded run (grid step is 0.002 in c0).
 COEFFICIENT_TOLERANCE = 1e-6
 NLL_TOLERANCE = 1e-6
 
@@ -55,8 +43,7 @@ def refit(metadata: dict, arrays) -> tuple[np.ndarray, RectBivariateSpline, Rect
         penalty = ridge * ((coefficients[0] - centre[0]) ** 2 + (coefficients[1] - centre[1]) ** 2)
         return float(training(coefficients[0], coefficients[1])[0, 0]) + penalty
 
-    # Start from the best grid node so the search cannot be accused of having
-    # been handed the answer.
+    # Start from the best grid point, not from the recorded coefficients.
     penalties = ridge * ((c0[:, None] - centre[0]) ** 2 + (c1[None, :] - centre[1]) ** 2)
     row, column = np.unravel_index(np.argmin(arrays["training_nll"] + penalties),
                                    arrays["training_nll"].shape)
@@ -102,14 +89,10 @@ def main() -> int:
 
     if failures:
         return 1
-    # The improvement is real and it is also tiny. Say so here, where anyone
-    # running the check will read it.
     print(
-        "\nThe fit is reproduced. Note what it is: the Harville coefficient sits at "
-        "its lower bound, and the holdout improvement is "
-        f"{report['holdout_improvement_nats']:.6f} nats out of "
-        f"{model['market_holdout_nll']:.3f}. That is not evidence of an edge or of "
-        "calibration."
+        "\nReproduced. The Harville coefficient is at its lower bound and the holdout "
+        f"improvement is {report['holdout_improvement_nats']:.6f} nats out of "
+        f"{model['market_holdout_nll']:.3f}, so this is not evidence of an edge."
     )
     return 0
 

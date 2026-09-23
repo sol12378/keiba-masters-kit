@@ -1,10 +1,10 @@
 # keiba-masters-kit
 
-A local voting runtime and the model pipeline that feeds it, taken from one participant's entry to the AI 競馬予想マスターズ 2026 contest.
+A local voting runtime and the model pipeline that feeds it, taken from my entry to the AI 競馬予想マスターズ 2026 contest.
 
 > **Please note**
 >
-> - This is an **unofficial** release by an individual participant. It is not affiliated with, or endorsed by, the contest organiser.
+> - This is an **unofficial** release by me as an individual participant. It is not affiliated with, or endorsed by, the contest organiser.
 > - Everything here works in the contest's virtual points. Nothing in this repository buys a real betting ticket.
 > - In Japan, betting on horse racing is limited to people aged 20 and over. Please read [DISCLAIMER.md](DISCLAIMER.md) (Japanese) before using it.
 

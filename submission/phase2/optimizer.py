@@ -1,12 +1,8 @@
 """Learn a small cross-market model and allocate virtual points to a target.
 
-PUBLISHED AS A RECORD.  This is the script that ran on 2026-09-20, with only
-its paths made relative.  ``historical()`` reads T-10 snapshots that are
-captured odds and are not redistributable, so it cannot run from a clone; the
-path below is left exactly where it pointed so the input is identifiable.
-
-To verify the fit without that data, run ``reproduce.py``, which re-derives the
-coefficients from the published objective surface.
+This is the script used on 2026-09-20 (only paths were changed for
+publication). historical() needs the T-10 snapshots, which are not included.
+Use reproduce.py to check the fitted coefficients.
 
 All probabilities are conditional market/model estimates, not championship odds.
 The shortlist knapsack maximizes single-race target-hit probability for a fixed
@@ -135,8 +131,7 @@ def allocate(rows, bank, allowance, target=TARGET, odds_factor=ODDS_FACTOR, *, e
 
 
 def historical():
-    # The original location, inside the private research repository. Kept as
-    # written so the inputs listed in model.json can be matched to it.
+    # Original data location (private repository). Override with KEIBA_T10_PANEL.
     panel = Path(os.environ.get("KEIBA_T10_PANEL",
                                 "outputs/experiments/JRA-DAILY-LAB/dates"))
     records = []

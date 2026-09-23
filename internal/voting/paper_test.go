@@ -124,10 +124,7 @@ func TestPaperDriverRejectsStakeAboveBalance(t *testing.T) {
 	}
 }
 
-// The runtime confirms a submission by comparing the canonical JSON of the
-// whole payload, and a JSON array is ordered.  A driver that tidies the bet
-// list turns every race into a CONFLICT and halts the day, which is what
-// happened the first time this ran under launchd.
+// Reconciliation compares the bet list in order, so the driver must not reorder it.
 func TestPaperDriverReadsBackTheBetListInTheSubmittedOrder(t *testing.T) {
 	driver := newTestPaperDriver(t)
 	token, _ := driver.Login(context.Background(), "local", "local")

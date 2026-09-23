@@ -9,13 +9,8 @@ import (
 	"time"
 )
 
-// Re-planning the same selections for a later post time leaves the payload
-// hash untouched -- the payload is race_id, marks and bets, with no schedule
-// in it -- while the bundle hash changes.  Arming compared only the payload
-// hash, so an operator could confirm the new bundle's digest and silently arm
-// the schedule that was imported earlier.  In the case that surfaced this, the
-// imported schedule had already passed its cutoff, so all four races expired
-// the moment they were armed.
+// The payload hash does not include the schedule, so a bundle with the same bets
+// but different post times must not arm the previously imported plans.
 func TestArmingRefusesABundleWhoseScheduleDiffersFromTheImportedPlan(t *testing.T) {
 	location, _ := time.LoadLocation("Asia/Tokyo")
 	clock := &fakeClock{now: time.Date(2026, 8, 15, 8, 30, 0, 0, location)}
@@ -64,8 +59,7 @@ func TestArmingRefusesABundleWhoseScheduleDiffersFromTheImportedPlan(t *testing.
 	}
 }
 
-// The same bundle that was imported still arms, so the new check does not
-// simply forbid arming.
+// The imported bundle itself still arms.
 func TestArmingAcceptsTheBundleThatWasImported(t *testing.T) {
 	location, _ := time.LoadLocation("Asia/Tokyo")
 	clock := &fakeClock{now: time.Date(2026, 8, 15, 8, 30, 0, 0, location)}
