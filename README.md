@@ -115,6 +115,9 @@ make demo
 - フェーズ2（14レース）の学習コードと確定係数、および**それが再現することの検査**
 - 実際に投票した204レースの買い目を含む台帳と、未解決の1,000ptを含む残高照合
 
+大会規約はソースコード・特徴量・予測結果の共有を禁じています。**運営に確認し、了承を
+得たうえで公開しています**（2026年9月23日）。詳細は [submission/README.md](submission/README.md)。
+
 そのほか [CONTRIBUTING.md](CONTRIBUTING.md)、[SECURITY.md](SECURITY.md)、
 [DISCLAIMER.md](DISCLAIMER.md)。
 
