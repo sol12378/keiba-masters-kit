@@ -5,10 +5,14 @@ description = "Model building and vote planning for keiba-masters-kit"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
+authors = [{ name = "Ryuichi Sato" }]
 dependencies = [
     "numpy>=1.26",
     "scipy>=1.11",
 ]
+
+[project.urls]
+Repository = "https://github.com/sol12378/keiba-masters-kit"
 
 [project.optional-dependencies]
 dev = [
